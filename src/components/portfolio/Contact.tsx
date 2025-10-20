@@ -16,7 +16,7 @@ export const Contact = () => {
       <h2 className="text-3xl font-bold">Contact Me</h2>
       <div className="bg-[#3545d4] w-14 h-1 my-4"></div>
       <p className="text-gray-400 mt-4">Get in touch</p>
-      <h3 className="text-white text-lg mt-2 mb-10 hidden md:block">Interested to work together? - Let's talk</h3>
+      <h3 className="text-white text-lg mt-2 mb-10 hidden md:block">Interested to work together? - Let&apos;s talk</h3>
       
       {/* Mensaje de estado */}
       {status.message && (
