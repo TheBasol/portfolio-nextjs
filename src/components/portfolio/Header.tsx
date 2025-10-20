@@ -56,7 +56,7 @@ export const Header = () => {
             Hola, Soy <span className="text-[#818bd4] bg-gradient-to-r from-[#818bd4] to-[#4d67f0] bg-clip-text text-transparent">Ingeniero de Software</span>
           </h1>
           <p className="text-gray-400 text-base md:text-lg max-w-md leading-relaxed">
-            Creando experiencias web modernas y responsivas con las últimas tecnologías
+            Creando aplicaciones modernas y responsivas con las últimas tecnologías
           </p>
           <Link href="#contact" className="flex justify-center items-center gap-3 w-56 h-14 text-white bg-gradient-to-r from-[#482ebb] to-[#4d67f0] rounded-xl cursor-pointer hover:from-[#5a3ad4] hover:to-[#6b7ff7] transition-all duration-300 transform hover:scale-105 shadow-lg hover:shadow-xl font-medium text-lg">
             Contact Me

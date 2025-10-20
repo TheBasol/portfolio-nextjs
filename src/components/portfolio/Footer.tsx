@@ -13,7 +13,7 @@ export const Footer = () => {
             </h3>
             <h4 className="text-lg text-gray-300 font-medium">Web Developer</h4>
             <p className="text-sm text-gray-400 max-w-xs">
-              Creando soluciones web innovadoras y experiencias digitales excepcionales
+              Creando soluciones innovadoras y experiencias digitales excepcionales
             </p>
           </div>
 

@@ -1,6 +1,7 @@
 
 import Image from 'next/image';
 import Link from 'next/link';
+import { TechIcon, getTechColor } from './Icons';
 
 // Define the type for a single project
 interface Project {
@@ -15,20 +16,20 @@ interface Project {
 // Array of projects with the defined type
 const projects: Project[] = [
   {
-    title: 'Gallery App React',
-    description: 'App para buscar imagenes libres de derechos de autor hecha con Typescript y React utilizando la api de unsplash.',
-    imageUrl: '/source/gallery.png',
-    liveUrl: 'https://gallery-app-typescript.netlify.app/',
-    githubUrl: 'https://github.com/TheBasol/Gallery-App-Typescript',
-    tags: ['react', 'typescript'],
+    title: 'Quiz Ai App',
+    description: 'App para hacer quizzes de inteligencia artificial hecha con Typescript y React utilizando la api de OpenAI.',
+    imageUrl: '/portfolio/quiz-ai.png',
+    liveUrl: 'https://quiz-ai-app-three.vercel.app/',
+    githubUrl: 'https://github.com/TheBasol/quiz-ai-app',
+    tags: ['next.js', 'tailwind', 'typescript'],
   },
   {
-    title: 'Phonestore Web',
-    description: 'Pagina de una tienda de telefonos 100% responsive hecha con CSS y Js para las animaciones.',
-    imageUrl: '/source/phonestore.png',
-    liveUrl: 'https://thebasol.github.io/PhoneStore/',
-    githubUrl: 'https://github.com/TheBasol/PhoneStore',
-    tags: ['html', 'css', 'js'],
+    title: 'Breaking News App',
+    description: 'Una aplicación moderna y responsiva de noticias construida con Next.js 15, TypeScript y Tailwind CSS que entrega noticias de última hora en tiempo real de todo el mundo.',
+    imageUrl: '/portfolio/breaking-news.png',
+    liveUrl: 'https://breaking-news-next.vercel.app/',
+    githubUrl: 'https://github.com/TheBasol/breaking-news-next?tab=readme-ov-file',
+    tags: ['next.js', 'typescript', 'tailwindcss'],
   },
   // ... other projects here
 ];
@@ -51,12 +52,20 @@ export const Portfolio = () => {
                 <p>{project.description}</p>
                 <Link href={project.liveUrl} target="_blank" rel="noopener noreferrer" className="flex justify-center items-center gap-2 w-40 h-12 text-white bg-[#482ebb] rounded-lg cursor-pointer hover:bg-opacity-80 transition-colors self-start">
                     Go
-                   <div className="arrow"></div>
+                   <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14"/>
+                   </svg>
                 </Link>
                 <div className="flex justify-between items-center mt-4">
-                  <a href={project.githubUrl} target="_blank" rel="noopener noreferrer" className="icon github" aria-label={`${project.title} GitHub repository`}></a>
+                  <a href={project.githubUrl} target="_blank" rel="noopener noreferrer" className="text-white hover:text-purple-400 transition-colors" aria-label={`${project.title} GitHub repository`}>
+                    <TechIcon name="github" className="w-8 h-8" />
+                  </a>
                   <div className="flex gap-4">
-                    {project.tags.map(tag => <div key={tag} className={`icon ${tag}`}></div>)}
+                    {project.tags.map(tag => (
+                      <div key={tag} className={`flex items-center ${getTechColor(tag)}`}>
+                        <TechIcon name={tag} className="w-6 h-6" />
+                      </div>
+                    ))}
                   </div>
                 </div>
               </div>

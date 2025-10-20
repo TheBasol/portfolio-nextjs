@@ -9,7 +9,7 @@ interface FixedCameraViewProps {
   target: [number, number, number];
 }
 
-export default function FixedCameraView({ position, target }: FixedCameraViewProps) {
+export const FixedCameraView = ({ position, target }: FixedCameraViewProps) => {
   const { camera } = useThree();
 
   useEffect(() => {

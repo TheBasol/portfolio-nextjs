@@ -7,3 +7,4 @@ export * from './portfolio/Footer';
 
 export * from './three/Wave';
 export * from './three/Particles';
+export * from './three/FixedCameraView';

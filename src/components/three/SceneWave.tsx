@@ -2,7 +2,7 @@
 'use client';
 
 import { Particles, Wave } from '@/components';
-import FixedCameraView from '@/components/three/FixedCameraView';
+import {FixedCameraView} from '@/components/three/FixedCameraView';
 import { Canvas } from '@react-three/fiber';
 import { EffectComposer, Bloom } from '@react-three/postprocessing';
 import { useDeviceDetection } from '@/hooks/useDeviceDetection';
@@ -31,7 +31,7 @@ export default function SceneWave() {
         position: [15.68, -0.83, 7.24] as [number, number, number], // Original desktop position
         target: [-0.55, -2.51, 3.15] as [number, number, number],
         fov: 45,
-        particleCount: 1000
+        particleCount: 1400
       };
     }
   };
@@ -39,18 +39,18 @@ export default function SceneWave() {
   const cameraConfig = getCameraConfig();
 
 return (
-    <div style={{ width: '100%', height: '100%', background: '#030014' }}>
+    <div style={{ width: '100%', height: '100%', background: '#191C32' }}>
       <Canvas camera={{ fov: cameraConfig.fov, near: 0.1, far: 1000 }}>
-        <color attach="background" args={['#030014']} />
-        <fog attach="fog" args={['#030014', 5, 25]} />
+        <color attach="background" args={['#191C32']} />
+        <fog attach="fog" args={['#191C32', 5, 25]} />
         
         <Wave />
         {/* Wave plane is 30x30 and positioned at [0, -1, 0] in Wave.tsx */}
         <Particles 
           count={cameraConfig.particleCount} 
           center={[0, -1, 0]} 
-          areaRadius={isMobile ? 12 : 15} 
-          verticalAmplitude={isMobile ? 0.2 : 0.3}
+          areaRadius={isMobile ? 12 : 20} 
+          verticalAmplitude={isMobile ? 0.2 : 0.6}
           driftAmplitude={isMobile ? 0.04 : 0.06}
         />
         <FixedCameraView position={cameraConfig.position} target={cameraConfig.target} />
