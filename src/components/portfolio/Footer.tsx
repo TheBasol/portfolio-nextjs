@@ -11,7 +11,7 @@ export const Footer = () => {
             <h3 className="text-2xl md:text-3xl font-bold bg-gradient-to-r from-white to-gray-300 bg-clip-text text-transparent">
               Enrique Vazquez
             </h3>
-            <h4 className="text-lg text-gray-300 font-medium">Web Developer</h4>
+            <h4 className="text-lg text-gray-300 font-medium">Ingeniero de Software</h4>
             <p className="text-sm text-gray-400 max-w-xs">
               Creando soluciones innovadoras y experiencias digitales excepcionales
             </p>
