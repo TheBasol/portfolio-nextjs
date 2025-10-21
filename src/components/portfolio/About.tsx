@@ -13,7 +13,7 @@ export const About = () => {
           </p>
         </div>
         <div>
-          <a href="/source/CV.pdf" download="CV-Enrique-Vazquez.pdf" className="flex justify-center items-center w-48 h-12 text-white bg-[#482ebb] rounded-lg cursor-pointer hover:bg-opacity-80 transition-colors">
+          <a href="/portfolio/CV - enriquevazquez.pdf" download="CV-Enrique-Vazquez.pdf" className="flex justify-center items-center w-48 h-12 text-white bg-[#482ebb] rounded-lg cursor-pointer hover:bg-opacity-80 transition-colors">
             Download CV
           </a>
         </div>
