@@ -3,7 +3,6 @@ import Image from 'next/image';
 import Link from 'next/link';
 import { TechIcon, getTechColor } from './Icons';
 
-// Define the type for a single project
 interface Project {
   title: string;
   description: string;
@@ -13,25 +12,31 @@ interface Project {
   tags: string[];
 }
 
-// Array of projects with the defined type
 const projects: Project[] = [
   {
     title: 'Quiz Ai App',
-    description: 'App para hacer quizzes de inteligencia artificial hecha con Typescript y React utilizando la api de OpenAI.',
+    description: 'App para hacer quizzes impulsada por inteligencia artificial hecha con Typescript, Next.js, la api de OpenAI y openRouter para contactar con los modelos de ai.',
     imageUrl: '/portfolio/quiz-ai.png',
     liveUrl: 'https://quiz-ai-app-three.vercel.app/',
     githubUrl: 'https://github.com/TheBasol/quiz-ai-app',
     tags: ['next.js', 'tailwind', 'typescript'],
   },
+    {
+    title: 'Crypto Plasma',
+    description: 'App para visualizar datos de criptomonedas inspirada en Crypto Bubble, construida con React y Three.js para una experiencia 3D.',
+    imageUrl: '/portfolio/crypto-plasma.png',
+    liveUrl: 'https://crypto-plasma-3d.vercel.app/',
+    githubUrl: 'https://github.com/TheBasol/crypto-plasma-3d',
+    tags: ['react', 'tailwind', 'typescript'],
+  },
   {
     title: 'Breaking News App',
-    description: 'Una aplicación moderna y responsiva de noticias construida con Next.js 15, TypeScript y Tailwind CSS que entrega noticias de última hora en tiempo real de todo el mundo.',
+    description: 'Una aplicación moderna y responsiva de noticias construida con Next.js, TypeScript y Tailwind CSS que entrega noticias de última hora en tiempo real de todo el mundo.',
     imageUrl: '/portfolio/breaking-news.png',
     liveUrl: 'https://breaking-news-next.vercel.app/',
     githubUrl: 'https://github.com/TheBasol/breaking-news-next?tab=readme-ov-file',
     tags: ['next.js', 'typescript', 'tailwindcss'],
   },
-  // ... other projects here
 ];
 
 export const Portfolio = () => {
