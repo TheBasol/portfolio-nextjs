@@ -15,11 +15,11 @@ interface Project {
 const projects: Project[] = [
   {
     title: 'Quiz Ai App',
-    description: 'App para hacer quizzes impulsada por inteligencia artificial hecha con Typescript, Next.js, la api de OpenAI y openRouter para contactar con los modelos de ai.',
+    description: 'App FullStack para hacer quizzes impulsada por inteligencia artificial hecha con Next.js en el Frontend, ASP.NET CORE en el Backend Y la api openRouter para contactar con los modelos de ai.',
     imageUrl: '/portfolio/quiz-ai.png',
     liveUrl: 'https://quiz-ai-app-three.vercel.app/',
     githubUrl: 'https://github.com/TheBasol/quiz-ai-app',
-    tags: ['next.js', 'tailwind', 'typescript'],
+    tags: ['next.js', '.net', 'tailwind', 'typescript'],
   },
     {
     title: 'Crypto Plasma',
