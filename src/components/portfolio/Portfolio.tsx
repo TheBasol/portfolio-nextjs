@@ -13,6 +13,14 @@ interface Project {
 }
 
 const projects: Project[] = [
+    {
+    title: 'Vult',
+    description: 'Vult is a secrets manager that protects your API keys, passwords, and tokens without sending them to the cloud. Everything stays on your computer, encrypted with military-grade technology.',
+    imageUrl: '/portfolio/vult.png',
+    liveUrl: 'https://vult-nine.vercel.app',
+    githubUrl: 'https://github.com/TheBasol/vult',
+    tags: ['.net', 'typescript'],
+  },
   {
     title: 'Quiz Ai App',
     description: 'Full-stack quiz application powered by artificial intelligence built with Next.js on the frontend, ASP.NET CORE on the backend, and the openRouter API to connect with AI models.',
