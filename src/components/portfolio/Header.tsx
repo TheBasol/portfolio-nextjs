@@ -51,12 +51,12 @@ export const Header = () => {
         </div>
         {/* Content overlay */}
         <div className="flex justify-center items-center flex-col gap-6 bg-[rgba(25,28,50,0.9)] backdrop-blur-sm w-full max-w-2xl p-8 md:p-10 rounded-2xl shadow-2xl border border-gray-700/50 text-center relative z-10">
-          <h3 className="text-gray-300 text-lg md:text-xl font-light tracking-wide">Welcome To My Portfolio Web</h3>
+          <h3 className="text-gray-300 text-lg md:text-xl font-light tracking-wide">Welcome To My Portfolio</h3>
           <h1 className="text-2xl sm:text-3xl md:text-4xl lg:text-5xl font-bold leading-tight">
-            Hola, Soy <span className="text-[#818bd4] bg-gradient-to-r from-[#818bd4] to-[#4d67f0] bg-clip-text text-transparent">Ingeniero de Software</span>
+            Hi, I&apos;m a <span className="text-[#818bd4] bg-gradient-to-r from-[#818bd4] to-[#4d67f0] bg-clip-text text-transparent">Software Engineer</span>
           </h1>
           <p className="text-gray-400 text-base md:text-lg max-w-md leading-relaxed">
-            Creando aplicaciones modernas y responsivas con las últimas tecnologías
+            Building modern and responsive applications with the latest technologies
           </p>
           <Link href="#contact" className="flex justify-center items-center gap-3 w-56 h-14 text-white bg-gradient-to-r from-[#482ebb] to-[#4d67f0] rounded-xl cursor-pointer hover:from-[#5a3ad4] hover:to-[#6b7ff7] transition-all duration-300 transform hover:scale-105 shadow-lg hover:shadow-xl font-medium text-lg">
             Contact Me

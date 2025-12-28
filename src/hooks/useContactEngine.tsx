@@ -44,7 +44,7 @@ export const useContactEngine = () => {
       [name]: value
     }));
     
-    // Limpiar el estado de error cuando el usuario empiece a escribir
+    // Clear error state when user starts typing
     if (status.type === 'error') {
       setStatus({ type: 'idle', message: '' });
     }

@@ -9,7 +9,7 @@ export const About = () => {
 
         <div className="max-w-3xl text-center leading-7">
           <p>
-            Soy un desarrollador de software con una muy grande curiosidad por la tecnología y el software. Mi experiencia principal se encuentra en el desarrollo full-stack, utilizando Next.js y React para construir interfaces de usuario modernas y eficientes, y con ASP.Net Core y Python para el desarrollo del backend de mis proyectos, también me apasiona el mundo de los gráficos por computadora, lo que me ha llevado a desarrollar proyectos de visualización 3D con Three.js.
+            I am a software developer with a great curiosity for technology and software. My main experience lies in full-stack development, using Next.js and React to build modern and efficient user interfaces, and ASP.Net Core and Python for backend development of my projects. I am also passionate about the world of computer graphics, which has led me to develop 3D visualization projects with Three.js.
           </p>
         </div>
         <div>

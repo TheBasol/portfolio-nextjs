@@ -15,7 +15,7 @@ interface Project {
 const projects: Project[] = [
   {
     title: 'Quiz Ai App',
-    description: 'App FullStack para hacer quizzes impulsada por inteligencia artificial hecha con Next.js en el Frontend, ASP.NET CORE en el Backend Y la api openRouter para contactar con los modelos de ai.',
+    description: 'Full-stack quiz application powered by artificial intelligence built with Next.js on the frontend, ASP.NET CORE on the backend, and the openRouter API to connect with AI models.',
     imageUrl: '/portfolio/quiz-ai.png',
     liveUrl: 'https://quiz-ai-app-three.vercel.app/',
     githubUrl: 'https://github.com/TheBasol/quiz-ai-app',
@@ -23,19 +23,11 @@ const projects: Project[] = [
   },
     {
     title: 'Crypto Plasma',
-    description: 'App para visualizar datos de criptomonedas inspirada en Crypto Bubble, construida con React y Three.js para una experiencia 3D.',
+    description: 'Cryptocurrency data visualization app inspired by Crypto Bubble, built with React and Three.js for a 3D experience.',
     imageUrl: '/portfolio/crypto-plasma.png',
     liveUrl: 'https://crypto-plasma-3d.vercel.app/',
     githubUrl: 'https://github.com/TheBasol/crypto-plasma-3d',
     tags: ['react', 'tailwind', 'typescript'],
-  },
-  {
-    title: 'Breaking News App',
-    description: 'Una aplicación moderna y responsiva de noticias construida con Next.js, TypeScript y Tailwind CSS que entrega noticias de última hora en tiempo real de todo el mundo.',
-    imageUrl: '/portfolio/breaking-news.png',
-    liveUrl: 'https://breaking-news-next.vercel.app/',
-    githubUrl: 'https://github.com/TheBasol/breaking-news-next?tab=readme-ov-file',
-    tags: ['next.js', 'typescript', 'tailwindcss'],
   },
 ];
 
