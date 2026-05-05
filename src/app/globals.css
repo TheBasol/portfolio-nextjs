@@ -4,6 +4,13 @@
   :root {
     --background: #191C32;
     --foreground: #ffffff;
+    --cube-ui-bg: #0f1422;
+    --cube-ui-bg-strong: #121a2b;
+    --cube-ui-border: #AAB1F2;
+    --cube-ui-accent: #22d3ee;
+    --cube-ui-accent-2: #f59e0b;
+    --cube-ui-glow: #7c3aed;
+    --cube-ui-text: #eef0ff;
   }
 
   html {
@@ -16,6 +23,223 @@
     font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', 'Oxygen', 'Ubuntu', 'Cantarell', sans-serif;
     line-height: 1.6;
     overflow-x: hidden;
+  }
+}
+
+.cube-ui {
+  font-family: var(--font-space), "Segoe UI", sans-serif;
+}
+
+.cube-ui-mono {
+  font-family: var(--font-mono), ui-monospace, SFMono-Regular, monospace;
+}
+
+.cube-preview-panel {
+  position: relative;
+  background:
+    radial-gradient(120% 120% at 10% 0%, rgba(56, 189, 248, 0.18), transparent 55%),
+    radial-gradient(120% 120% at 100% 10%, rgba(124, 58, 237, 0.18), transparent 60%),
+    linear-gradient(140deg, rgba(14, 20, 38, 0.96), rgba(22, 30, 52, 0.94));
+  border: 1px solid rgba(170, 177, 242, 0.35);
+  box-shadow: 0 14px 28px rgba(6, 8, 18, 0.35), inset 0 1px 0 rgba(255, 255, 255, 0.08);
+  backdrop-filter: blur(14px);
+  overflow: hidden;
+  animation: cube-rise 260ms ease-out;
+}
+
+.cube-preview-panel-attached {
+  border-radius: 18px;
+  border-color: rgba(170, 177, 242, 0.45);
+  box-shadow:
+    inset 0 0 0 1px rgba(255, 255, 255, 0.12),
+    inset 0 -12px 20px rgba(7, 10, 20, 0.45),
+    0 10px 18px rgba(6, 8, 18, 0.25);
+  transform: perspective(1200px) rotateX(0.6deg);
+}
+
+.cube-preview-panel::before,
+.cube-preview-panel::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+}
+
+.cube-preview-panel::before {
+  background:
+    repeating-linear-gradient(90deg, rgba(255, 255, 255, 0.04) 0 1px, transparent 1px 72px),
+    repeating-linear-gradient(0deg, rgba(255, 255, 255, 0.03) 0 1px, transparent 1px 56px);
+  opacity: 0.35;
+}
+
+.cube-preview-panel::after {
+  background: linear-gradient(180deg, rgba(255, 255, 255, 0.08), transparent 35%);
+  opacity: 0.4;
+}
+
+.cube-preview-panel {
+  transform-origin: bottom center;
+}
+
+.cube-preview-panel .cube-menu-header {
+  position: relative;
+}
+
+.cube-preview-panel .cube-menu-header::after {
+  content: "";
+  position: absolute;
+  left: 0;
+  right: 0;
+  bottom: -12px;
+  height: 1px;
+  background: linear-gradient(90deg, transparent, rgba(56, 189, 248, 0.35), transparent);
+}
+
+.cube-preview-panel > * {
+  position: relative;
+  z-index: 1;
+}
+
+.cube-menu-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding-bottom: 12px;
+  border-bottom: 1px solid rgba(170, 177, 242, 0.2);
+}
+
+.cube-menu-title {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+
+.cube-menu-status {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.cube-menu-dot {
+  width: 10px;
+  height: 10px;
+  border-radius: 999px;
+  background: rgba(34, 211, 238, 0.9);
+  box-shadow: 0 0 12px rgba(34, 211, 238, 0.7);
+}
+
+.cube-menu-bar {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+  margin-top: 12px;
+}
+
+.cube-menu-tab {
+  padding: 6px 14px;
+  border-radius: 999px;
+  border: 1px solid rgba(170, 177, 242, 0.2);
+  background: rgba(255, 255, 255, 0.04);
+  font-size: 11px;
+  letter-spacing: 0.28em;
+  text-transform: uppercase;
+  color: rgba(226, 232, 240, 0.8);
+}
+
+.cube-menu-tab-active {
+  border-color: rgba(34, 211, 238, 0.6);
+  color: #e0f2fe;
+  background: rgba(34, 211, 238, 0.12);
+  box-shadow: inset 0 0 12px rgba(34, 211, 238, 0.15);
+}
+
+.cube-menu-slot {
+  background: linear-gradient(160deg, rgba(255, 255, 255, 0.07), rgba(255, 255, 255, 0.02));
+  box-shadow: inset 0 0 0 1px rgba(255, 255, 255, 0.06);
+}
+
+.cube-modal-backdrop {
+  background: radial-gradient(circle at top, rgba(34, 211, 238, 0.08), rgba(5, 8, 16, 0.8));
+  backdrop-filter: blur(10px);
+  animation: cube-fade 200ms ease-out;
+}
+
+.cube-modal-panel {
+  background:
+    radial-gradient(120% 120% at 20% 0%, rgba(34, 211, 238, 0.12), transparent 50%),
+    radial-gradient(140% 120% at 90% 10%, rgba(124, 58, 237, 0.18), transparent 60%),
+    linear-gradient(160deg, rgba(15, 20, 34, 0.98), rgba(8, 10, 18, 0.98));
+  box-shadow: 0 30px 80px rgba(8, 10, 18, 0.65);
+  animation: cube-pop 220ms ease-out;
+}
+
+.cube-modal-card {
+  background: linear-gradient(140deg, rgba(255, 255, 255, 0.06), rgba(255, 255, 255, 0.02));
+}
+
+.cube-anchor {
+  position: absolute;
+  left: 50%;
+  top: -18px;
+  width: 14px;
+  height: 14px;
+  background: rgba(34, 211, 238, 0.65);
+  border-radius: 999px;
+  box-shadow: 0 0 18px rgba(34, 211, 238, 0.6);
+  transform: translateX(-50%);
+}
+
+.cube-anchor::after {
+  content: "";
+  position: absolute;
+  left: 50%;
+  top: 12px;
+  width: 2px;
+  height: 26px;
+  background: linear-gradient(180deg, rgba(34, 211, 238, 0.7), transparent);
+  transform: translateX(-50%);
+}
+
+.cube-anchor-modal {
+  top: -20px;
+}
+
+@keyframes cube-fade {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
+}
+
+@keyframes cube-pop {
+  from {
+    transform: translateY(12px) scale(0.98);
+    opacity: 0;
+  }
+  to {
+    transform: translateY(0) scale(1);
+    opacity: 1;
+  }
+}
+
+@keyframes cube-rise {
+  from {
+    transform: translateY(16px);
+    opacity: 0;
+  }
+  to {
+    transform: translateY(0);
+    opacity: 1;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .cube-preview-panel,
+  .cube-modal-backdrop,
+  .cube-modal-panel {
+    animation: none;
   }
 }
 
@@ -56,4 +280,69 @@ button:focus-visible {
   outline: 2px solid #4d67f0;
   outline-offset: 2px;
   border-radius: 4px;
+}
+/* Cube Loader Animations */
+.perspective-1000 {
+  perspective: 1000px;
+}
+
+.preserve-3d {
+  transform-style: preserve-3d;
+}
+
+.animate-cube-rotate {
+  animation: cube-rotate 20s linear infinite;
+}
+
+@keyframes cube-rotate {
+  0% {
+    transform: rotateX(0deg) rotateY(0deg) rotateZ(0deg);
+  }
+  100% {
+    transform: rotateX(360deg) rotateY(360deg) rotateZ(360deg);
+  }
+}
+
+.translate-z-64 {
+  transform: translateZ(64px);
+}
+
+.-translate-z-64 {
+  transform: translateZ(-64px);
+}
+
+.rotate-y-180 {
+  transform: rotateY(180deg);
+}
+
+.translate-x-64 {
+  transform: translateX(64px);
+}
+
+.rotate-y-90 {
+  transform: rotateY(90deg);
+}
+
+.-translate-x-64 {
+  transform: translateX(-64px);
+}
+
+.-rotate-y-90 {
+  transform: rotateY(-90deg);
+}
+
+.-translate-y-64 {
+  transform: translateY(-64px);
+}
+
+.rotate-x-90 {
+  transform: rotateX(90deg);
+}
+
+.translate-y-64 {
+  transform: translateY(64px);
+}
+
+.-rotate-x-90 {
+  transform: rotateX(-90deg);
 }

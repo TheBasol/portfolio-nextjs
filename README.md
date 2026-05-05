@@ -1,46 +1,43 @@
-#  Modern Portfolio Website
+# 🎮 GameCube BIOS Portfolio
 
-A sleek, modern portfolio website built with Next.js 15, featuring stunning 3D animations, responsive design, and a functional contact form.
+A high-performance, 3D interactive portfolio experience inspired by the legendary Nintendo GameCube BIOS menu. Built with **Next.js 15**, **React 19**, and **Three.js**, this project pushes the boundaries of modern web portfolios with a retro-tech aesthetic.
 
-![Next.js](https://img.shields.io/badge/Next.js-15.5.6-black?style=for-the-badge&logo=next.js)
+![Next.js](https://img.shields.io/badge/Next.js-15.5-black?style=for-the-badge&logo=next.js)
 ![React](https://img.shields.io/badge/React-19-61DAFB?style=for-the-badge&logo=react)
-![TypeScript](https://img.shields.io/badge/TypeScript-5-3178C6?style=for-the-badge&logo=typescript)
+![Three.js](https://img.shields.io/badge/Three.js-000000?style=for-the-badge&logo=three.js&logoColor=white)
 ![Tailwind CSS](https://img.shields.io/badge/Tailwind_CSS-4-38B2AC?style=for-the-badge&logo=tailwind-css)
 
-##  Features
+---
 
-###  **Modern Design**
-- Responsive layout optimized for all devices
-- Dark theme with vibrant accent colors
-- Smooth animations and transitions
-- Professional typography using Geist font
+## ✨ Features
 
-###  **3D Visualization**
-- Interactive 3D wave animation using React Three Fiber
-- Particle system with realistic physics
-- Device-optimized performance (mobile/tablet/desktop)
-- Bloom post-processing effects
+### 🕹️ **Interactive 3D Navigation**
+- **GameCube BIOS Logic**: Seamless transitions between navigation states (Projects, About, Experience, Contact).
+- **Multimodal Controls**:
+  - ⌨️ **Keyboard**: WASD or Arrow Keys.
+  - 📱 **Touch**: Swipe gestures for mobile devices.
+  - 🖱️ **D-Pad**: On-screen interactive navigation guide.
+- **Glassmorphism Materials**: Premium physical-based rendering (PBR) materials with realistic transparency and blur.
 
-###  **Contact System**
-- Functional contact form with real-time validation
-- Email delivery via Resend API
-- Auto-hiding success messages
-- Professional HTML email templates
+### 🌌 **Advanced 3D Graphics**
+- **React Three Fiber & Drei**: Optimized 3D scene management.
+- **Post-processing Engine**: Real-time Bloom, Selective Glow, and Contact Shadows.
+- **Instanced Mesh Background**: High-performance background particles using instanced rendering for 60FPS on mobile.
+- **Responsive 3D Engine**: Dynamic scene scaling that adapts to portrait and landscape orientations.
 
-###  **Technical Excellence**
-- Built with Next.js 15 App Router
-- TypeScript for type safety
-- Tailwind CSS 4 for styling
-- ESLint + Prettier for code quality
-- Optimized performance and SEO
+### 🛠️ **Modern Architecture**
+- **Next.js 15 App Router**: Leveraging the latest server components and streaming features.
+- **React 19 Ready**: Utilizing the latest React hooks and performance improvements.
+- **Tailwind CSS 4**: Next-generation styling with CSS variables and optimized build times.
+- **Resend Integration**: Fully functional contact form with HTML email templates.
 
-
+---
 
 ## 🚀 Quick Start
 
 ### Prerequisites
-- Node.js 18+ 
-- npm, yarn, or pnpm
+- Node.js 18.17+
+- npm / yarn / pnpm
 
 ### Installation
 
@@ -53,10 +50,6 @@ cd portfolio-nextjs
 2. **Install dependencies**
 ```bash
 npm install
-# or
-yarn install
-# or
-pnpm install
 ```
 
 3. **Set up environment variables**
@@ -67,150 +60,69 @@ cp .env.example .env.local
 Edit `.env.local` with your configuration:
 ```env
 # Resend Email Configuration
-RESEND_API_KEY=your_resend_api_key_here
+RESEND_API_KEY=re_your_api_key
 RESEND_FROM_EMAIL=onboarding@resend.dev
-CONTACT_EMAIL=your_contact_email@example.com
+CONTACT_EMAIL=your_email@example.com
 ```
 
 4. **Run the development server**
 ```bash
 npm run dev
-# or
-yarn dev
-# or
-pnpm dev
 ```
 
-5. **Open your browser**
+5. **Initialize System**
 Navigate to [http://localhost:3000](http://localhost:3000)
-
-##  Email Setup
-
-The portfolio includes a functional contact form powered by [Resend](https://resend.com):
-
-1. **Create a Resend account** at [resend.com](https://resend.com)
-2. **Generate an API key** from your dashboard
-3. **Add your API key** to `.env.local`
-4. **Configure your contact email** where you want to receive messages
-
-### Email Features
-- ✅ Client & server-side validation
-- ✅ Professional HTML email templates
-- ✅ Auto-reply configuration
-- ✅ Rate limiting and spam protection
-- ✅ 3,000 free emails per month
-
-##  Project Structure
-
-```
-portfolio-nextjs/
-├── src/
-│   ├── app/                 # Next.js 15 App Router
-│   │   ├── (portfolio)/     # Portfolio pages
-│   │   ├── api/contact/     # Contact form API
-│   │   └── globals.css      # Global styles
-│   ├── components/          # React components
-│   │   ├── portfolio/       # Portfolio-specific components
-│   │   │   ├── About.tsx
-│   │   │   ├── Contact.tsx
-│   │   │   ├── Header.tsx
-│   │   │   ├── Portfolio.tsx
-│   │   │   └── ...
-│   │   └── three/           # 3D components
-│   │       ├── Wave.tsx
-│   │       ├── Particles.tsx
-│   │       └── ...
-│   └── hooks/               # Custom React hooks
-├── public/                  # Static assets
-│   └── portfolio/           # Project images
-├── .env.example            # Environment variables template
-└── README.md              # You are here!
-```
-
-##  Tech Stack
-
-### **Frontend**
-- **Next.js 15** - React framework with App Router
-- **React 19** - UI library with latest features
-- **TypeScript** - Type-safe JavaScript
-- **Tailwind CSS 4** - Utility-first CSS framework
-
-### **3D Graphics**
-- **React Three Fiber** - React renderer for Three.js
-- **Three.js** - 3D graphics library
-- **@react-three/drei** - Useful helpers for R3F
-- **@react-three/postprocessing** - Post-processing effects
-
-### **Backend & Services**
-- **Resend** - Modern email delivery service
-- **Vercel** - Deployment and hosting platform
-
-### **Development Tools**
-- **ESLint** - Code linting
-- **Prettier** - Code formatting
-- **TypeScript** - Static type checking
-
-##  Responsive Design
-
-The portfolio is fully responsive and optimized for:
-
--  **Mobile** (320px+) - Touch-optimized navigation
--  **Tablet** (768px+) - Adapted layouts and interactions
--  **Desktop** (1024px+) - Full feature experience
--  **Large screens** (1440px+) - Enhanced visuals
-
-##  Customization
-
-### **Colors & Branding**
-Edit `src/app/globals.css` and Tailwind config for your brand colors:
-
-```css
-:root {
-  --primary: #3545d4;
-  --secondary: #482ebb;
-  --accent: #AAB2FF;
-}
-```
-
-### **Content**
-Update your information in:
-- `src/components/portfolio/About.tsx` - About section
-- `src/components/portfolio/Portfolio.tsx` - Projects showcase
-- `src/components/portfolio/Header.tsx` - Hero section
-
-### **3D Scene**
-Customize the 3D elements in:
-- `src/components/three/Wave.tsx` - Wave animation
-- `src/components/three/Particles.tsx` - Particle system
-- `src/components/three/SceneWave.tsx` - Main 3D scene
-
-##  Deployment
-
-### **Vercel (Recommended)**
-1. Push your code to GitHub
-2. Connect your repository to [Vercel](https://vercel.com)
-3. Add environment variables in Vercel dashboard
-4. Deploy automatically on every push
-
-### **Other Platforms**
-The portfolio can be deployed on any platform that supports Next.js:
-- Netlify
-- Railway
-- AWS Amplify
-- Google Cloud Platform
-
-##  License
-
-This project is licensed under the MIT License - see the [LICENSE](LICENSE) file for details.
-
-##  Acknowledgments
-
-- [Next.js](https://nextjs.org) - The React framework
-- [React Three Fiber](https://docs.pmnd.rs/react-three-fiber) - 3D graphics
-- [Tailwind CSS](https://tailwindcss.com) - Styling
-- [Resend](https://resend.com) - Email delivery
-- [Vercel](https://vercel.com) - Hosting platform
 
 ---
 
-Built with ❤️ by [Enrique Vazquez](https://github.com/TheBasol)
+## 🎮 Controls
+
+| Action | Keyboard | Touch | UI |
+| :--- | :--- | :--- | :--- |
+| **Projects** | `W` / `↑` | Swipe Up | D-Pad Up |
+| **About** | `S` / `↓` | Swipe Down | D-Pad Down |
+| **Experience** | `A` / `←` | Swipe Left | D-Pad Left |
+| **Contact** | `D` / `→` | Swipe Right | D-Pad Right |
+| **Enter Section** | `Enter` | Tap Cube | Click Cube |
+| **Return Home** | `Opposite Key` | Swipe Opposite | Back Button |
+
+---
+
+## 📂 Project Structure
+
+```text
+portfolio-nextjs/
+├── src/
+│   ├── app/                 # Next.js 15 App Router (Pages & API)
+│   ├── components/
+│   │   ├── GameCube/        # 3D Logic (Cube, Modal, Scene)
+│   │   ├── portfolio/       # UI Components (D-Pad, Contact Form)
+│   │   └── ui/              # Reusable UI primitives
+│   ├── data/                # Content definitions (portfolioContent.ts)
+│   ├── hooks/               # Custom animation & interaction hooks
+│   └── styles/              # Tailwind 4 & Global CSS
+├── public/                  # 3D models and static assets
+└── ...
+```
+
+---
+
+## 🛠️ Tech Stack
+
+- **Framework**: [Next.js 15](https://nextjs.org/)
+- **Runtime**: [React 19](https://react.dev/)
+- **3D Engine**: [Three.js](https://threejs.org/) / [React Three Fiber](https://docs.pmnd.rs/react-three-fiber)
+- **Styling**: [Tailwind CSS 4](https://tailwindcss.com/)
+- **Animations**: [Framer Motion](https://www.framer.com/motion/)
+- **Email**: [Resend](https://resend.com/)
+- **Deployment**: [Vercel](https://vercel.com/)
+
+---
+
+## 📝 License
+
+This project is licensed under the MIT License - see the [LICENSE](LICENSE) file for details.
+
+---
+
+Built with 💜 by [Enrique Vazquez](https://github.com/TheBasol)
