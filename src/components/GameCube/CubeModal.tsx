@@ -44,7 +44,7 @@ export const CubeModal = ({ isOpen, section, onClose }: CubeModalProps) => {
 
   const modalContent = (
     <div
-      className="cube-modal-backdrop fixed inset-0 z-[100] flex items-center justify-center px-4 py-8 pointer-events-auto"
+      className="cube-modal-backdrop fixed inset-0 z-[100] flex items-center justify-center px-2 py-4 sm:px-4 sm:py-8 pointer-events-auto"
       onClick={(e) => {
         if (e.target === e.currentTarget) onClose();
       }}
@@ -55,15 +55,15 @@ export const CubeModal = ({ isOpen, section, onClose }: CubeModalProps) => {
         aria-modal="true"
         aria-labelledby="cube-modal-title"
         tabIndex={-1}
-        className="cube-modal-panel cube-ui touch-auto w-[min(94vw,72rem)] max-h-[86vh] overflow-hidden rounded-3xl border border-white/10 p-6 md:p-10 shadow-2xl"
+        className="cube-modal-panel cube-ui touch-auto flex flex-col w-[min(96vw,72rem)] max-h-[90vh] overflow-hidden rounded-2xl md:rounded-3xl border border-white/10 p-4 sm:p-6 md:p-10 shadow-2xl"
         onClick={(event) => event.stopPropagation()}
       >
-        <div className="flex flex-wrap items-start justify-between gap-4">
+        <div className="flex flex-wrap items-start justify-between gap-4 shrink-0 mb-4 sm:mb-6">
           <div>
             <p className="cube-ui-mono text-[10px] uppercase tracking-[0.35em] text-slate-400">
               Cube Face
             </p>
-            <h2 id="cube-modal-title" className="text-3xl md:text-4xl font-semibold text-white">
+            <h2 id="cube-modal-title" className="text-2xl sm:text-3xl md:text-4xl font-semibold text-white">
               {sectionTitle[section]}
             </h2>
           </div>
@@ -77,16 +77,16 @@ export const CubeModal = ({ isOpen, section, onClose }: CubeModalProps) => {
           </button>
         </div>
 
-        <div className="mt-6 max-h-[70vh] overflow-y-auto pr-2">
+        <div className="flex-1 overflow-y-auto pr-2 -mr-2">
           {section === "PROJECTS" && (
-            <div className="grid gap-6">
+            <div className="grid gap-4 sm:gap-6">
               {projects.map((project) => (
                 <div
                   key={project.title}
-                  className="cube-modal-card rounded-2xl border border-white/10 p-4 md:p-6"
+                  className="cube-modal-card rounded-2xl border border-white/10 p-4 sm:p-5 md:p-6"
                 >
-                  <div className="grid gap-6 md:grid-cols-[1.1fr_1.4fr] md:items-center">
-                    <div className="relative aspect-video overflow-hidden rounded-2xl border border-white/10">
+                  <div className="grid gap-4 sm:gap-6 md:grid-cols-[1.1fr_1.4fr] md:items-center">
+                    <div className="relative aspect-video overflow-hidden rounded-xl sm:rounded-2xl border border-white/10">
                       <Image
                         src={project.imageUrl}
                         alt={project.title}
@@ -95,24 +95,24 @@ export const CubeModal = ({ isOpen, section, onClose }: CubeModalProps) => {
                         className="object-cover object-top"
                       />
                     </div>
-                    <div className="flex flex-col gap-4">
+                    <div className="flex flex-col gap-3 sm:gap-4">
                       <div>
-                        <h3 className="text-2xl font-semibold text-white">
+                        <h3 className="text-xl sm:text-2xl font-semibold text-white">
                           {project.title}
                         </h3>
-                        <p className="mt-2 text-sm text-slate-200 leading-relaxed">
+                        <p className="mt-1.5 sm:mt-2 text-[13px] sm:text-sm text-slate-200 leading-relaxed">
                           {project.description}
                         </p>
                       </div>
-                      <div className="flex flex-wrap items-center gap-4">
+                      <div className="flex flex-wrap items-center gap-3 sm:gap-4">
                         <a
                           href={project.liveUrl}
                           target="_blank"
                           rel="noopener noreferrer"
-                          className="relative z-10 inline-flex items-center gap-2 rounded-full border border-cyan-300/50 bg-cyan-500/10 px-4 py-2 text-xs uppercase tracking-[0.3em] text-cyan-200 hover:bg-cyan-500/20 cursor-pointer pointer-events-auto"
+                          className="relative z-10 inline-flex items-center gap-1.5 sm:gap-2 rounded-full border border-cyan-300/50 bg-cyan-500/10 px-3 sm:px-4 py-1.5 sm:py-2 text-[10px] sm:text-xs uppercase tracking-[0.3em] text-cyan-200 hover:bg-cyan-500/20 cursor-pointer pointer-events-auto"
                         >
                           View Live
-                          <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                          <svg className="w-3.5 h-3.5 sm:w-4 sm:h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                             <path
                               strokeLinecap="round"
                               strokeLinejoin="round"
@@ -126,17 +126,17 @@ export const CubeModal = ({ isOpen, section, onClose }: CubeModalProps) => {
                             href={project.githubUrl}
                             target="_blank"
                             rel="noopener noreferrer"
-                            className="relative z-10 inline-flex items-center gap-2 text-sm text-slate-200 hover:text-purple-300 cursor-pointer pointer-events-auto"
+                            className="relative z-10 inline-flex items-center gap-1.5 sm:gap-2 text-[13px] sm:text-sm text-slate-200 hover:text-purple-300 cursor-pointer pointer-events-auto"
                             aria-label={`${project.title} GitHub repository`}
                           >
-                            <TechIcon name="github" className="w-6 h-6" />
+                            <TechIcon name="github" className="w-5 h-5 sm:w-6 sm:h-6" />
                             GitHub
                           </a>
                         )}
-                        <div className="flex flex-wrap items-center gap-3">
+                        <div className="flex flex-wrap items-center gap-2 sm:gap-3">
                           {project.tags.map((tag) => (
                             <span key={tag} className={`flex items-center ${getTechColor(tag)}`}>
-                              <TechIcon name={tag} className="w-5 h-5" />
+                              <TechIcon name={tag} className="w-4 h-4 sm:w-5 sm:h-5" />
                             </span>
                           ))}
                         </div>
@@ -149,31 +149,31 @@ export const CubeModal = ({ isOpen, section, onClose }: CubeModalProps) => {
           )}
 
           {section === "ABOUT" && (
-            <div className="grid gap-6 md:grid-cols-[1.3fr_0.7fr]">
-              <div className="rounded-2xl border border-white/10 bg-white/5 p-6">
+            <div className="grid gap-4 sm:gap-6 md:grid-cols-[1.3fr_0.7fr]">
+              <div className="rounded-2xl border border-white/10 bg-white/5 p-4 sm:p-5 md:p-6">
                 <p className="cube-ui-mono text-[10px] uppercase tracking-[0.35em] text-slate-400">
                   Summary
                 </p>
-                <p className="mt-4 text-lg text-white">
+                <p className="mt-3 sm:mt-4 text-base sm:text-lg text-white">
                   {aboutContent.summary}
                 </p>
-                <p className="mt-4 text-sm text-slate-200 leading-relaxed">
+                <p className="mt-3 sm:mt-4 text-[13px] sm:text-sm text-slate-200 leading-relaxed">
                   {aboutContent.body}
                 </p>
               </div>
-              <div className="rounded-2xl border border-white/10 bg-white/5 p-6 flex flex-col justify-between gap-4">
+              <div className="rounded-2xl border border-white/10 bg-white/5 p-4 sm:p-5 md:p-6 flex flex-col justify-between gap-4">
                 <div>
                   <p className="cube-ui-mono text-[10px] uppercase tracking-[0.35em] text-slate-400">
                     Current Focus
                   </p>
-                  <p className="mt-3 text-sm text-slate-200 leading-relaxed">
+                  <p className="mt-2 sm:mt-3 text-[13px] sm:text-sm text-slate-200 leading-relaxed">
                     Building modern web products, crafting APIs, and shaping 3D visual narratives.
                   </p>
                 </div>
                 <a
                   href={aboutContent.cvUrl}
                   download="CV-Enrique-Vazquez.pdf"
-                  className="inline-flex items-center justify-center rounded-full border border-cyan-300/50 bg-cyan-500/10 px-4 py-2 text-xs uppercase tracking-[0.3em] text-cyan-200"
+                  className="inline-flex items-center justify-center rounded-full border border-cyan-300/50 bg-cyan-500/10 px-4 py-2 text-[10px] sm:text-xs uppercase tracking-[0.3em] text-cyan-200"
                 >
                   {aboutContent.cvLabel}
                 </a>
@@ -182,26 +182,26 @@ export const CubeModal = ({ isOpen, section, onClose }: CubeModalProps) => {
           )}
 
           {section === "EXPERIENCE" && (
-            <div className="grid gap-4 md:grid-cols-2">
+            <div className="grid gap-6 md:grid-cols-2">
               {experience.map((item) => (
                 <div
                   key={item.title}
-                  className="rounded-2xl border border-white/10 bg-white/5 p-5"
+                  className="flex flex-col rounded-2xl border border-white/10 bg-white/5 p-4 sm:p-5 md:p-6"
                 >
                   <p className="cube-ui-mono text-[10px] uppercase tracking-[0.35em] text-slate-400">
                     {item.subtitle}
                   </p>
-                  <h3 className="mt-2 text-xl font-semibold text-white">
+                  <h3 className="mt-2 text-lg sm:text-xl font-semibold text-white">
                     {item.title}
                   </h3>
-                  <p className="mt-3 text-sm text-slate-200 leading-relaxed whitespace-pre-line">
+                  <p className="mt-3 text-[13px] sm:text-sm text-slate-200 leading-relaxed whitespace-pre-line flex-1">
                     {item.summary}
                   </p>
-                  <div className="mt-4 flex flex-wrap gap-2">
+                  <div className="mt-5 flex flex-wrap gap-2">
                     {item.tags.map((tag) => (
                       <span
                         key={tag}
-                        className="rounded-full border border-white/10 bg-white/5 px-3 py-1 text-[11px] uppercase tracking-[0.2em] text-slate-300"
+                        className="rounded-full border border-white/10 bg-white/5 px-2.5 py-1 sm:px-3 text-[10px] sm:text-[11px] uppercase tracking-[0.2em] text-slate-300"
                       >
                         {tag}
                       </span>
@@ -213,17 +213,17 @@ export const CubeModal = ({ isOpen, section, onClose }: CubeModalProps) => {
           )}
 
           {section === "CONTACT" && (
-            <div className="grid gap-6 md:grid-cols-[0.9fr_1.1fr]">
-              <div className="rounded-2xl border border-white/10 bg-white/5 p-6">
+            <div className="grid gap-4 sm:gap-6 md:grid-cols-[0.9fr_1.1fr]">
+              <div className="rounded-2xl border border-white/10 bg-white/5 p-4 sm:p-5 md:p-6">
                 <p className="cube-ui-mono text-[10px] uppercase tracking-[0.35em] text-slate-400">
                   Contact
                 </p>
-                <h3 className="mt-3 text-2xl font-semibold text-white">Let us build the next release</h3>
-                <p className="mt-3 text-sm text-slate-200 leading-relaxed">
+                <h3 className="mt-2 sm:mt-3 text-xl sm:text-2xl font-semibold text-white">Let us build the next release</h3>
+                <p className="mt-2 sm:mt-3 text-[13px] sm:text-sm text-slate-200 leading-relaxed">
                   Share a brief, timeline, and goals. I will follow up with a plan and next steps.
                 </p>
               </div>
-              <div className="rounded-2xl border border-white/10 bg-white/5 p-6">
+              <div className="rounded-2xl border border-white/10 bg-white/5 p-4 sm:p-5 md:p-6">
                 <ContactForm compact className="w-full" />
               </div>
             </div>
