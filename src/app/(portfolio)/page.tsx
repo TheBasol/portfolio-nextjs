@@ -161,10 +161,10 @@ export default function Home() {
 
           <div className="space-y-1 md:space-y-2">
             <h1 className="text-3xl md:text-6xl font-black italic tracking-tighter text-white">
-              HI, I&apos;M A <span className="text-transparent bg-clip-text bg-gradient-to-r from-purple-400 to-indigo-500">SOFTWARE ENGINEER</span>
+              HI, I&apos;M A <span className="text-transparent bg-clip-text bg-gradient-to-r from-purple-400 to-indigo-500">FULL-STACK SOFTWARE DEVELOPER</span>
             </h1>
-            <p className="text-xs md:text-lg text-slate-400 font-medium tracking-wide max-w-2xl mx-auto">
-              Building modern and responsive applications with the latest technologies
+            <p className="text-xs md:text-lg text-slate-400 font-medium tracking-wide max-w-3xl mx-auto">
+              Building AI-Powered Applications | C# / .NET | TypeScript / Next.js | Python
             </p>
           </div>
 
