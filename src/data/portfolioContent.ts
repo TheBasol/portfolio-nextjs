@@ -13,6 +13,7 @@ export interface AboutContent {
   body: string;
   cvUrl: string;
   cvLabel: string;
+  imageUrl?: string;
 }
 
 export interface ExperienceItem {
@@ -24,7 +25,7 @@ export interface ExperienceItem {
 
 export const projects: Project[] = [
   {
-    title: "ExanIa",
+    title: "ExanIA",
     description:
       "ExanIA is an EdTech SaaS designed to democratize access to high-quality exam preparation (CENEVAL/EXANI-II). By leveraging Generative AI, we provide personalized, real-time tutoring that adapts to the students learning curve.",
     imageUrl: "/portfolio/exania.png",
@@ -40,16 +41,7 @@ export const projects: Project[] = [
     liveUrl: "https://quiz-ai-app-three.vercel.app/",
     githubUrl: "https://github.com/TheBasol/quiz-ai-app",
     tags: ["next.js", ".net", "tailwind", "typescript"],
-  },
-  {
-    title: "Crypto Plasma",
-    description:
-      "Cryptocurrency data visualization app inspired by Crypto Bubble, built with React and Three.js for a 3D experience.",
-    imageUrl: "/portfolio/crypto-plasma.png",
-    liveUrl: "https://crypto-plasma-3d.vercel.app/",
-    githubUrl: "https://github.com/TheBasol/crypto-plasma-3d",
-    tags: ["react", "tailwind", "typescript"],
-  },
+  }
 ];
 
 export const aboutContent: AboutContent = {
@@ -58,16 +50,17 @@ export const aboutContent: AboutContent = {
     "Full Stack developer and tech entrepreneur focused on democratizing education through Artificial Intelligence.",
   body:
     "Specialist in the architecture of scalable solutions using the .NET ecosystem and Google Cloud Platform. I have a solid ability to transform complex technical challenges into market-validated products, currently leading the development of an EdTech platform selected by Startup México.",
-  cvUrl: "/portfolio/CV - enriquevazquez.pdf",
+  cvUrl: "/portfolio/CV - Enrique Vazquez.pdf",
   cvLabel: "Download CV",
+  imageUrl: "/portfolio/me.png",
 };
 
 export const experience: ExperienceItem[] = [
   {
-    title: "ExanIA, Guadalupe",
+    title: "ExanIA, Guadalupe, Nuevo León, Mexico",
     subtitle: "Full-Stack Software Engineer & Founder (2026 - Present)",
     summary:
-      "Led the end-to-end design, development, and launch of a freemium Micro-SaaS platform for university admission exam preparation, successfully scaling to over 100 active users.\n\n• Architecture & Infrastructure: Designed and deployed a scalable infrastructure on Google Cloud Platform using Docker and GitHub Actions for automated continuous deployment.\n\n• Full-Stack & UX Optimization: Built a highly responsive frontend using Next.js and Tailwind CSS. Optimized Core Web Vitals (CLS/LCP) via Skeleton UIs and implemented gamified assessment features like 'Sudden Death' and adaptive diagnostic exams to boost student retention.\n\n• SaaS Monetization & Growth: Engineered a robust subscription system integrated with Stripe webhooks. Developed an idempotent, tiered referral engine using ASP.NET Core and Entity Framework to drive organic user acquisition.\n\n• AI Integration: Implemented a Socratic tutoring engine ('ExanIA') powered by Gemini 3 Flash using RAG techniques and pgvector in PostgreSQL, delivering personalized, contextual explanations for students.\n\n• Audit and Data Quality: Led the automated audit and validation of over 15,000 academic test items using LLMs to ensure high-fidelity simulations.",
+      "Co-designed, full-stack developed, and launched ExanIA, an adaptive, AI-native B2C EdTech SaaS platform for Mexican university admission exams, scaling to over 260 registered users organically.\n\n• Product Launch & Organic Growth: Co-designed, full-stack developed, and launched an adaptive, AI-native B2C EdTech SaaS platform tailored for high-stakes Mexican university admission exams (EXANI-II, UNAM, IPN). Scaled traction 100% organically to over 260 registered users and validated market willingness-to-pay with an initial 1% conversion rate on a zero-dollar marketing budget.\n\n• AI Architecture & Spaced Repetition: Engineered a Socratic tutoring engine powered by large language models (LLMs) utilizing Retrieval-Augmented Generation (RAG) and pgvector in PostgreSQL. Automated the real-time generation of contextual, explanatory micro-lessons and personalized flashcard decks based strictly on each student's unique error profile.\n\n• Data Engineering & Quality Assurance: Developed an automated LLM-driven data pipeline to audit and validate a proprietary question bank of over 20,000 academic test items. Implemented structural guardrails within the architecture to strictly mitigate model hallucinations, ensuring high-fidelity exam simulations that mirror official guide restrictions.\n\n• Lean Cloud Infrastructure & Finanzas: Deployed a highly scalable, cost-efficient infrastructure on Google Cloud Platform using Docker and automated CI/CD pipelines via GitHub Actions. Maintained an optimized 72% software gross margin by capping fixed server and database development costs at an ultra-lean $528 MXN per month.\n\n• UX Engineering & Monetization: Built a highly responsive web application using Next.js and Tailwind CSS, utilizing Skeleton UIs to eliminate hardware friction on mobile devices, which represent 99.3% of the target market. Architected an idempotent, tiered subscription engine integrated with Stripe webhooks to process three premium tiers (Express, Preparación, and Semestral) to effectively maximize upfront cash flow.",
     tags: [
       "Next.js",
       "React",
@@ -79,7 +72,10 @@ export const experience: ExperienceItem[] = [
       "Stripe API",
       "Docker",
       "RAG",
-      "Tailwind CSS"
+      "Tailwind CSS",
+      "GitHub Actions",
+      "pgvector",
+      "LLMs"
     ],
   },
   {

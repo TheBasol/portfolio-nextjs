@@ -162,13 +162,27 @@ export const CubeModal = ({ isOpen, section, onClose }: CubeModalProps) => {
                 </p>
               </div>
               <div className="rounded-2xl border border-white/10 bg-white/5 p-4 sm:p-5 md:p-6 flex flex-col justify-between gap-4">
-                <div>
-                  <p className="cube-ui-mono text-[10px] uppercase tracking-[0.35em] text-slate-400">
-                    Current Focus
-                  </p>
-                  <p className="mt-2 sm:mt-3 text-[13px] sm:text-sm text-slate-200 leading-relaxed">
-                    Building modern web products, crafting APIs, and shaping 3D visual narratives.
-                  </p>
+                <div className="flex flex-col gap-4">
+                  {aboutContent.imageUrl && (
+                    <div className="relative aspect-square w-full max-w-[160px] mx-auto overflow-hidden rounded-2xl border border-white/10 bg-white/5">
+                      <Image
+                        src={aboutContent.imageUrl}
+                        alt="Enrique Vázquez"
+                        fill
+                        sizes="(max-width: 768px) 160px, 160px"
+                        className="object-cover object-center"
+                        priority
+                      />
+                    </div>
+                  )}
+                  <div>
+                    <p className="cube-ui-mono text-[10px] uppercase tracking-[0.35em] text-slate-400">
+                      Current Focus
+                    </p>
+                    <p className="mt-2 sm:mt-3 text-[13px] sm:text-sm text-slate-200 leading-relaxed">
+                      Building modern web products, crafting APIs, and shaping 3D visual narratives.
+                    </p>
+                  </div>
                 </div>
                 <a
                   href={aboutContent.cvUrl}

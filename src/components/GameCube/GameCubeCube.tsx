@@ -73,23 +73,32 @@ export const GameCubeCube = React.forwardRef<THREE.Group, GameCubeCubeProps>(
       if (onOpen) onOpen();
     };
 
+    const sectionColors: Record<CubeSection, string> = {
+      PROJECTS: "#06b6d4",
+      ABOUT: "#f97316",
+      EXPERIENCE: "#10b981",
+      CONTACT: "#94a3b8",
+    };
+
+    const isActive = (s: CubeSection) => activeSection === s && interactionEnabled;
+
     return (
       <group ref={meshRef}>
-        {/* Outer Crystal Shell */}
+        {/* Outer Crystal Shell — more transparent to reveal embedded faces */}
         <RoundedBox args={[2, 2, 2]} radius={0.12} smoothness={4}>
           <meshPhysicalMaterial
             color="#8b5cf6"
             thickness={1.5}
             roughness={0.1}
-            transmission={0.6}
+            transmission={0.7}
             ior={1.4}
             side={THREE.DoubleSide}
             transparent
-            opacity={0.9}
+            opacity={0.8}
             metalness={0.1}
             clearcoat={1}
             emissive="#5d3fd3"
-            emissiveIntensity={0.2}
+            emissiveIntensity={activeSection ? 0.35 : 0.2}
           />
         </RoundedBox>
 
@@ -109,6 +118,22 @@ export const GameCubeCube = React.forwardRef<THREE.Group, GameCubeCubeProps>(
           <meshBasicMaterial color="#a855f7" wireframe transparent opacity={0.2} />
         </RoundedBox>
 
+        {/* ── Interior Lights — glow from active face ── */}
+        {activeSection && (
+          <pointLight
+            position={
+              activeSection === "PROJECTS" ? [0, 0.6, 0] :
+              activeSection === "ABOUT" ? [0, -0.6, 0] :
+              activeSection === "EXPERIENCE" ? [-0.6, 0, 0] :
+              [0.6, 0, 0]
+            }
+            color={sectionColors[activeSection]}
+            intensity={0.5}
+            distance={2.5}
+            decay={2}
+          />
+        )}
+
         {/* Navigation Text (Front Face) */}
         <group position={[0, 0, 1.01]}>
           <FaceText position={[0, 0.65, 0]} rotation={[0, 0, 0]} text="PROJECTS" color="#fff" fontSize={0.16} />
@@ -124,68 +149,125 @@ export const GameCubeCube = React.forwardRef<THREE.Group, GameCubeCubeProps>(
           {!activeSection && <FaceText position={[0.82, 0, 0]} rotation={[0, 0, 0]} text="▶" color="#a855f7" fontSize={0.12} />}
         </group>
 
-        {/* PROJECTS (Top Face) */}
-        <group position={[0, 1.01, 0]} rotation={[-Math.PI / 2, 0, 0]}>
+        {/* ── PROJECTS (Top Face) ── */}
+        <group position={[0, 1.005, 0]} rotation={[-Math.PI / 2, 0, 0]}>
+          {/* Embedded screen backing plane */}
+          {isActive("PROJECTS") && (
+            <mesh position={[0, 0, -0.015]}>
+              <planeGeometry args={[1.7, 1.7]} />
+              <meshStandardMaterial
+                color="#000000"
+                emissive="#06b6d4"
+                emissiveIntensity={0.15}
+                transparent
+                opacity={0.35}
+                side={THREE.FrontSide}
+              />
+            </mesh>
+          )}
           <Html
             transform
-            distanceFactor={1.6}
-            pointerEvents={activeSection === "PROJECTS" && interactionEnabled ? "auto" : "none"}
+            distanceFactor={1.5}
+            pointerEvents={isActive("PROJECTS") ? "auto" : "none"}
             style={{
               width: "480px",
               height: "480px",
-              transition: "all 0.5s ease",
-              opacity: activeSection === "PROJECTS" && interactionEnabled ? 1 : 0,
+              transition: "opacity 0.6s ease",
+              opacity: isActive("PROJECTS") ? 1 : 0,
+              animation: isActive("PROJECTS") ? "cube-face-materialize 0.7s ease-out" : "none",
             }}
           >
             <CubePreview section="PROJECTS" isEmbedded onOpen={handleOpen} />
           </Html>
         </group>
 
-        {/* ABOUT (Bottom Face) */}
-        <group position={[0, -1.01, 0]} rotation={[Math.PI / 2, 0, 0]}>
+        {/* ── ABOUT (Bottom Face) ── */}
+        <group position={[0, -1.005, 0]} rotation={[Math.PI / 2, 0, 0]}>
+          {isActive("ABOUT") && (
+            <mesh position={[0, 0, -0.015]}>
+              <planeGeometry args={[1.7, 1.7]} />
+              <meshStandardMaterial
+                color="#000000"
+                emissive="#f97316"
+                emissiveIntensity={0.15}
+                transparent
+                opacity={0.35}
+                side={THREE.FrontSide}
+              />
+            </mesh>
+          )}
           <Html
             transform
-            distanceFactor={1.6}
-            pointerEvents={activeSection === "ABOUT" && interactionEnabled ? "auto" : "none"}
+            distanceFactor={1.5}
+            pointerEvents={isActive("ABOUT") ? "auto" : "none"}
             style={{
               width: "480px",
               height: "480px",
-              transition: "all 0.5s ease",
-              opacity: activeSection === "ABOUT" && interactionEnabled ? 1 : 0,
+              transition: "opacity 0.6s ease",
+              opacity: isActive("ABOUT") ? 1 : 0,
+              animation: isActive("ABOUT") ? "cube-face-materialize 0.7s ease-out" : "none",
             }}
           >
             <CubePreview section="ABOUT" isEmbedded onOpen={handleOpen} />
           </Html>
         </group>
 
-        {/* EXPERIENCE (Left Face) */}
-        <group position={[-1.01, 0, 0]} rotation={[0, -Math.PI / 2, 0]}>
+        {/* ── EXPERIENCE (Left Face) ── */}
+        <group position={[-1.005, 0, 0]} rotation={[0, -Math.PI / 2, 0]}>
+          {isActive("EXPERIENCE") && (
+            <mesh position={[0, 0, -0.015]}>
+              <planeGeometry args={[1.7, 1.7]} />
+              <meshStandardMaterial
+                color="#000000"
+                emissive="#10b981"
+                emissiveIntensity={0.15}
+                transparent
+                opacity={0.35}
+                side={THREE.FrontSide}
+              />
+            </mesh>
+          )}
           <Html
             transform
-            distanceFactor={1.6}
-            pointerEvents={activeSection === "EXPERIENCE" && interactionEnabled ? "auto" : "none"}
+            distanceFactor={1.5}
+            pointerEvents={isActive("EXPERIENCE") ? "auto" : "none"}
             style={{
               width: "480px",
               height: "480px",
-              transition: "all 0.5s ease",
-              opacity: activeSection === "EXPERIENCE" && interactionEnabled ? 1 : 0,
+              transition: "opacity 0.6s ease",
+              opacity: isActive("EXPERIENCE") ? 1 : 0,
+              animation: isActive("EXPERIENCE") ? "cube-face-materialize 0.7s ease-out" : "none",
             }}
           >
             <CubePreview section="EXPERIENCE" isEmbedded onOpen={handleOpen} />
           </Html>
         </group>
 
-        {/* CONTACT (Right Face) */}
-        <group position={[1.01, 0, 0]} rotation={[0, Math.PI / 2, 0]}>
+        {/* ── CONTACT (Right Face) ── */}
+        <group position={[1.005, 0, 0]} rotation={[0, Math.PI / 2, 0]}>
+          {isActive("CONTACT") && (
+            <mesh position={[0, 0, -0.015]}>
+              <planeGeometry args={[1.7, 1.7]} />
+              <meshStandardMaterial
+                color="#000000"
+                emissive="#94a3b8"
+                emissiveIntensity={0.15}
+                transparent
+                opacity={0.35}
+                side={THREE.FrontSide}
+              />
+            </mesh>
+          )}
           <Html
             transform
-            distanceFactor={1.6}
-            pointerEvents={activeSection === "CONTACT" && interactionEnabled ? "auto" : "none"}
+            distanceFactor={1.5}
+            pointerEvents={isActive("CONTACT") ? "auto" : "none"}
             style={{
               width: "480px",
               height: "480px",
-              transition: "all 0.5s ease",
-              opacity: activeSection === "CONTACT" && interactionEnabled ? 1 : 0,
+              transition: "opacity 0.6s ease",
+              opacity: isActive("CONTACT") ? 1 : 0,
+              animation: isActive("CONTACT") ? "cube-face-materialize 0.7s ease-out" : "none",
             }}
           >
             <CubePreview section="CONTACT" isEmbedded onOpen={handleOpen} />
@@ -198,3 +280,4 @@ export const GameCubeCube = React.forwardRef<THREE.Group, GameCubeCubeProps>(
 );
 
 GameCubeCube.displayName = "GameCubeCube";
+
