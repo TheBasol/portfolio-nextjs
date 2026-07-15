@@ -19,14 +19,16 @@ export const ContactForm = ({ compact = false, className = "" }: ContactFormProp
     <div className={className}>
       {status.message && (
         <div
-          className={`mt-4 p-4 rounded-lg text-center w-full ${
+          role="status"
+          aria-live="polite"
+          className={`mt-2 p-3 sm:p-4 rounded-lg text-center w-full text-sm ${
             compact ? "max-w-none" : "max-w-3xl"
           } ${
             status.type === "success"
-              ? "bg-green-900/50 border border-green-500 text-green-300"
+              ? "bg-emerald-950/50 border border-emerald-500/60 text-emerald-200"
               : status.type === "error"
-              ? "bg-red-900/50 border border-red-500 text-red-300"
-              : "bg-blue-900/50 border border-blue-500 text-blue-300"
+                ? "bg-red-950/50 border border-red-500/60 text-red-200"
+                : "bg-sky-950/50 border border-sky-500/60 text-sky-200"
           }`}
         >
           {status.message}
@@ -35,69 +37,93 @@ export const ContactForm = ({ compact = false, className = "" }: ContactFormProp
 
       <form
         onSubmit={handleSubmit}
-        className={`mt-6 flex flex-col items-center justify-center w-full gap-5 ${
+        className={`mt-4 sm:mt-5 flex flex-col items-stretch w-full gap-4 ${
           compact ? "max-w-none" : "max-w-3xl"
         }`}
       >
         <div className={rowClass}>
+          <div className="cube-form-field">
+            <label htmlFor="contact-name" className="cube-form-label cube-ui-mono">
+              Name
+            </label>
+            <input
+              id="contact-name"
+              type="text"
+              placeholder="Your Name"
+              name="name"
+              value={formData.name}
+              onChange={handleInputChange}
+              required
+              disabled={status.type === "loading"}
+              className="cube-form-input"
+            />
+          </div>
+          <div className="cube-form-field">
+            <label htmlFor="contact-email" className="cube-form-label cube-ui-mono">
+              Email
+            </label>
+            <input
+              id="contact-email"
+              type="email"
+              placeholder="Your Email"
+              name="email"
+              value={formData.email}
+              onChange={handleInputChange}
+              required
+              disabled={status.type === "loading"}
+              className="cube-form-input"
+            />
+          </div>
+        </div>
+
+        <div className={`cube-form-field ${fieldClass}`}>
+          <label htmlFor="contact-subject" className="cube-form-label cube-ui-mono">
+            Subject
+          </label>
           <input
+            id="contact-subject"
             type="text"
-            placeholder="Your Name"
-            name="name"
-            value={formData.name}
+            placeholder="Subject"
+            name="subject"
+            value={formData.subject}
             onChange={handleInputChange}
             required
             disabled={status.type === "loading"}
-            className="bg-[#2E324F] rounded-md border-2 border-[#AAB2FF] text-gray-300 p-3 w-full focus:outline-none focus:border-[#818bd4] transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
-          />
-          <input
-            type="email"
-            placeholder="Your Email"
-            name="email"
-            value={formData.email}
-            onChange={handleInputChange}
-            required
-            disabled={status.type === "loading"}
-            className="bg-[#2E324F] rounded-md border-2 border-[#AAB2FF] text-gray-300 p-3 w-full focus:outline-none focus:border-[#818bd4] transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+            className="cube-form-input"
           />
         </div>
-        <input
-          type="text"
-          placeholder="Subject"
-          name="subject"
-          value={formData.subject}
-          onChange={handleInputChange}
-          required
-          disabled={status.type === "loading"}
-          className={`bg-[#2E324F] rounded-md border-2 border-[#AAB2FF] text-gray-300 p-3 ${
-            fieldClass
-          } focus:outline-none focus:border-[#818bd4] transition-colors disabled:opacity-50 disabled:cursor-not-allowed`}
-        />
-        <textarea
-          name="message"
-          placeholder="Your Message"
-          value={formData.message}
-          onChange={handleInputChange}
-          required
-          disabled={status.type === "loading"}
-          className={`bg-[#2E324F] rounded-md border-2 border-[#AAB2FF] text-gray-300 p-3 ${
-            fieldClass
-          } h-32 resize-none focus:outline-none focus:border-[#818bd4] transition-colors disabled:opacity-50 disabled:cursor-not-allowed`}
-        />
+
+        <div className={`cube-form-field ${fieldClass}`}>
+          <label htmlFor="contact-message" className="cube-form-label cube-ui-mono">
+            Message
+          </label>
+          <textarea
+            id="contact-message"
+            name="message"
+            placeholder="Your Message"
+            value={formData.message}
+            onChange={handleInputChange}
+            required
+            disabled={status.type === "loading"}
+            rows={5}
+            className="cube-form-input resize-y min-h-32"
+          />
+        </div>
+
         <button
           type="submit"
           disabled={status.type === "loading"}
-          className="flex justify-center items-center gap-2 w-48 h-12 text-white bg-[#482ebb] rounded-lg cursor-pointer hover:bg-opacity-80 transition-all duration-300 disabled:opacity-50 disabled:cursor-not-allowed disabled:hover:bg-[#482ebb]"
+          className="cube-form-submit self-center sm:self-start"
         >
           {status.type === "loading" ? (
             <>
-              <div className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin"></div>
+              <span className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin" />
               Sending...
             </>
           ) : (
             <>
               Send Message
-              <svg className="w-4 h-4 rotate-90" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <svg className="w-4 h-4 rotate-90" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true">
                 <path
                   strokeLinecap="round"
                   strokeLinejoin="round"

@@ -53,75 +53,69 @@ export const CubePreview = ({ section, onOpen, anchor, isEmbedded }: CubePreview
 
     return (
       <div
-        className={`cube-face-embedded flex h-full w-full flex-col border-[2px] ${accentBorder} rounded-[14px] p-8 text-white select-none pointer-events-auto overflow-hidden relative group`}
-        style={{ background: `radial-gradient(ellipse at center, ${accentGlow}, transparent 70%)` }}
+        className={`cube-face-embedded flex h-full w-full flex-col border ${accentBorder} rounded-xl p-6 text-white select-none pointer-events-auto overflow-hidden relative`}
+        style={{
+          background: `radial-gradient(ellipse at 50% 0%, ${accentGlow}, transparent 62%), linear-gradient(155deg, rgba(33, 18, 72, 0.58), rgba(8, 10, 25, 0.48))`,
+        }}
       >
-        {/* Scanline Sweep on Materialize */}
         <div className="cube-face-scan-overlay" />
+        <div className="absolute inset-0 pointer-events-none bg-[linear-gradient(rgba(18,16,16,0)_50%,rgba(0,0,0,0.06)_50%)] bg-[length:100%_4px] opacity-25 rounded-[inherit]" />
 
-        {/* Subtle Retro Scanlines */}
-        <div className="absolute inset-0 pointer-events-none bg-[linear-gradient(rgba(18,16,16,0)_50%,rgba(0,0,0,0.06)_50%)] bg-[length:100%_4px] opacity-30 rounded-[inherit]" />
-
-        <div className="relative z-10 flex-1 flex flex-col justify-between">
-          <div className="flex justify-between items-start">
-            <div className="space-y-1">
-              <div className="flex items-center gap-2">
-                <div className={`w-2 h-2 rounded-full ${accentText.replace('text', 'bg')} animate-pulse`} />
-                <p className="cube-ui-mono text-[12px] uppercase tracking-[0.5em] opacity-50">
-                  Memory Slot 01
-                </p>
-              </div>
-              <h3 className={`text-6xl font-black tracking-tighter italic ${accentText}`} style={{ textShadow: `0 0 20px ${accentGlow}` }}>
-                {sectionTitle[section].toUpperCase()}
-              </h3>
+        <div className="relative z-10 flex flex-1 flex-col justify-between gap-3">
+          <div className="space-y-1.5">
+            <div className="flex items-center gap-2">
+              <div className={`h-1.5 w-1.5 rounded-full ${accentText.replace("text", "bg")} animate-pulse`} />
+              <p className="cube-ui-mono text-sm uppercase tracking-[0.16em] text-white/80">
+                Section Preview
+              </p>
             </div>
-            <div className="cube-ui-mono text-[10px] opacity-30 text-right uppercase tracking-widest">
-              Block: {section === 'PROJECTS' ? '04' : section === 'ABOUT' ? '01' : section === 'EXPERIENCE' ? '08' : '12'}<br/>
-              Status: OK
-            </div>
+            <h3
+              className={`cube-face-embedded-title font-black tracking-tighter italic ${accentText}`}
+              style={{ textShadow: `0 0 16px ${accentGlow}` }}
+            >
+              {sectionTitle[section].toUpperCase()}
+            </h3>
           </div>
 
-          <div className="flex flex-col gap-6 my-4">
-            <p className="text-xl text-slate-200/80 leading-relaxed font-medium">
+          <div className="flex flex-col gap-3">
+            <p className="text-xl text-slate-100/95 leading-snug">
               {section === "PROJECTS" && "Accessing stored development archives and project data."}
               {section === "ABOUT" && "Initializing biographical summary and technical background."}
-              {section === "EXPERIENCE" && "Retreiving career trajectory and core competencies."}
+              {section === "EXPERIENCE" && "Retrieving career trajectory and core competencies."}
               {section === "CONTACT" && "Establishing direct communication channel for inquiries."}
             </p>
 
-            {/* Section Specific Visual Details */}
-            <div className="grid grid-cols-2 gap-3 opacity-80">
-              {section === "PROJECTS" && projects.slice(0, 2).map((p) => (
-                <div key={p.title} className="bg-white/5 border border-white/8 rounded-xl p-4">
-                  <p className="text-xs cube-ui-mono opacity-40 uppercase mb-1">Archive</p>
-                  <p className="text-lg font-bold truncate leading-none">{p.title}</p>
-                </div>
-              ))}
-              {section === "EXPERIENCE" && experience.slice(0, 2).map((exp) => (
-                <div key={exp.title} className="bg-white/5 border border-white/8 rounded-xl p-4">
-                  <p className="text-xs cube-ui-mono opacity-40 uppercase mb-1">Entry</p>
-                  <p className="text-lg font-bold truncate leading-none">{exp.title}</p>
-                </div>
-              ))}
-              {section === "ABOUT" && (
-                <div className="col-span-2 bg-white/5 border border-white/8 rounded-xl p-4">
-                  <div className="flex justify-between items-center mb-2">
-                    <p className="text-xs cube-ui-mono opacity-40 uppercase">Developer Bio</p>
-                    <p className="text-xs cube-ui-mono opacity-40 uppercase">v1.0.4</p>
+            <div className="grid grid-cols-1 gap-2">
+              {section === "PROJECTS" &&
+                projects.slice(0, 1).map((p) => (
+                  <div key={p.title} className="bg-white/8 border border-white/15 rounded-lg p-3">
+                    <p className="text-xs cube-ui-mono text-white/65 uppercase mb-1">Latest archive</p>
+                    <p className="text-xl font-semibold leading-tight line-clamp-2">{p.title}</p>
                   </div>
+                ))}
+              {section === "EXPERIENCE" &&
+                experience.slice(0, 1).map((exp) => (
+                  <div key={exp.title} className="bg-white/8 border border-white/15 rounded-lg p-3">
+                    <p className="text-xs cube-ui-mono text-white/65 uppercase mb-1">Current role</p>
+                    <p className="text-xl font-semibold leading-tight line-clamp-2">{exp.title}</p>
+                  </div>
+                ))}
+              {section === "ABOUT" && (
+                <div className="bg-white/5 border border-white/10 rounded-lg p-3">
+                  <p className="text-sm cube-ui-mono text-white/65 uppercase mb-2">Developer Bio</p>
                   <div className="h-1.5 w-full bg-white/5 rounded-full overflow-hidden">
-                    <div className="h-full bg-orange-500 w-[85%] animate-pulse" />
+                    <div className="h-full bg-orange-500 w-[85%]" />
                   </div>
                 </div>
               )}
               {section === "CONTACT" && (
-                <div className="col-span-2 flex items-center gap-4 bg-white/5 border border-white/8 rounded-xl p-4">
-                  <div className="w-12 h-12 rounded-lg bg-slate-500/10 border border-white/8 flex items-center justify-center">
-                    <div className="w-6 h-6 border-2 border-slate-300 rounded-full border-t-transparent animate-spin" />
+                <div className="flex items-center gap-3 bg-white/5 border border-white/10 rounded-lg p-3">
+                  <div className="h-10 w-10 rounded-md bg-slate-500/10 border border-white/10 flex items-center justify-center shrink-0">
+                    <div className="h-5 w-5 border-2 border-slate-300 rounded-full border-t-transparent animate-spin" />
                   </div>
                   <div>
-                    <p className="text-sm font-bold">Signal Connection Ready</p>
-                    <p className="text-xs cube-ui-mono opacity-40 uppercase">Awaiting Input</p>
+                    <p className="text-lg font-semibold leading-tight">Signal Connection Ready</p>
+                    <p className="text-xs cube-ui-mono text-white/60 uppercase">Awaiting Input</p>
                   </div>
                 </div>
               )}
@@ -134,17 +128,16 @@ export const CubePreview = ({ section, onOpen, anchor, isEmbedded }: CubePreview
               e.stopPropagation();
               onOpen();
             }}
-            className={`group/btn relative w-full py-6 rounded-xl bg-white/5 border ${accentBorder} overflow-hidden transition-all hover:bg-white/10 active:scale-[0.98]`}
+            className={`group/btn relative w-full py-4 rounded-lg bg-white/5 border ${accentBorder} overflow-hidden transition-all hover:bg-white/10 active:scale-[0.98]`}
           >
-            <div className="relative z-10 flex items-center justify-center gap-4">
-              <span className={`text-3xl font-black italic tracking-[0.2em] uppercase ${accentText}`}>
+            <div className="relative z-10 flex items-center justify-center gap-2.5">
+              <span className={`text-xl font-black italic tracking-[0.15em] uppercase ${accentText}`}>
                 Open
               </span>
-              <div className="flex items-center gap-2 px-3 py-1 bg-white/10 rounded-full border border-white/8">
-                <span className="cube-ui-mono text-[10px] text-white/60 uppercase">Press Start</span>
-              </div>
+              <span className="cube-ui-mono text-xs text-white/65 uppercase px-2 py-0.5 rounded-full border border-white/10 bg-white/5">
+                Enter
+              </span>
             </div>
-            {/* Hover Shine Effect */}
             <div className="absolute inset-0 bg-gradient-to-r from-transparent via-white/5 to-transparent -translate-x-full group-hover/btn:translate-x-full transition-transform duration-700" />
           </button>
         </div>

@@ -33,7 +33,7 @@ export default function RootLayout({
 }) {
   return (
     <html lang="en" className="!scroll-smooth">
-      <body className={`${roboto.className} ${spaceGrotesk.variable} ${shareTechMono.variable} bg-[#191C32] text-white`}>
+      <body className={`${roboto.className} ${spaceGrotesk.variable} ${shareTechMono.variable} bg-[#060606] text-white`}>
         {children}
       </body>
     </html>
