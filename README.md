@@ -13,17 +13,31 @@ A high-performance, 3D interactive portfolio experience inspired by the legendar
 
 ### 🕹️ **Interactive 3D Navigation**
 - **GameCube BIOS Logic**: Seamless transitions between navigation states (Projects, About, Experience, Contact).
+- **Startup Boot Sequence**: Nostalgic intro sequence complete with dynamic Web Audio API procedural sound synthesis (custom 4-note ascending boot jingle).
 - **Multimodal Controls**:
   - ⌨️ **Keyboard**: WASD or Arrow Keys.
   - 📱 **Touch**: Swipe gestures for mobile devices.
   - 🖱️ **D-Pad**: On-screen interactive navigation guide.
 - **Glassmorphism Materials**: Premium physical-based rendering (PBR) materials with realistic transparency and blur.
 
+### 💾 **Memory Card (MDX Notes System)**
+- **Retro Integration**: Access technical notes and articles via the HUD's "Memory Card" slot.
+- **Local MDX Content**: Write notes in standard Markdown with React components and GFM (GitHub Flavored Markdown) support.
+- **Interactive Mermaid.js Diagrams**: Render complex visual flowcharts and architectural diagrams directly inside MDX posts.
+- **Reading Progress Bar & Scroll Controls**: Built-in progress indicator and smooth scroll-to-top functionality for long reads.
+- **Automatic Categorization**: Folders inside `src/content/notes/` are automatically mapped as searchable subjects (e.g., `concepts`, `portfolio`).
+- **Premium Reader UI**: Ultra-minimalist 2D glassmorphic reader view built with `@tailwindcss/typography` for optimal mobile/desktop reading.
+
 ### 🌌 **Advanced 3D Graphics**
 - **React Three Fiber & Drei**: Optimized 3D scene management.
 - **Post-processing Engine**: Real-time Bloom, Selective Glow, and Contact Shadows.
 - **Instanced Mesh Background**: High-performance background particles using instanced rendering for 60FPS on mobile.
 - **Responsive 3D Engine**: Dynamic scene scaling that adapts to portrait and landscape orientations.
+
+### 🔍 **SEO & Open Graph Suite**
+- **Dynamic Open Graph Engine**: `@vercel/og` dynamic image generation (`/api/og`) producing 1200x630 social card previews tailored for main pages and individual MDX notes.
+- **Dynamic Icons & Metadata**: Dynamic SVG Favicon (`/icon`), Apple Touch Icon (`/apple-icon`), XML Sitemap (`/sitemap.xml`), and `robots.txt`.
+- **Search Engine Optimization**: Full semantic metadata and structured Open Graph / Twitter Cards configuration.
 
 ### 🛠️ **Modern Architecture**
 - **Next.js 15 App Router**: Leveraging the latest server components and streaming features.
@@ -49,7 +63,7 @@ cd portfolio-nextjs
 
 2. **Install dependencies**
 ```bash
-npm install
+pnpm install
 ```
 
 3. **Set up environment variables**
@@ -67,7 +81,7 @@ CONTACT_EMAIL=your_email@example.com
 
 4. **Run the development server**
 ```bash
-npm run dev
+pnpm dev
 ```
 
 5. **Initialize System**
@@ -93,15 +107,25 @@ Navigate to [http://localhost:3000](http://localhost:3000)
 ```text
 portfolio-nextjs/
 ├── src/
-│   ├── app/                 # Next.js 15 App Router (Pages & API)
+│   ├── app/                 # Next.js 15 App Router (Pages, Notes, SEO & API)
+│   │   ├── (portfolio)/     # Main interactive portfolio & note reader routes
+│   │   ├── api/og/          # Dynamic Open Graph image generation endpoint
+│   │   ├── icon.tsx         # Dynamic Favicon generator
+│   │   ├── apple-icon.tsx   # Dynamic Apple Touch Icon generator
+│   │   ├── robots.ts        # Dynamic robots.txt
+│   │   └── sitemap.ts       # Dynamic XML sitemap generator
 │   ├── components/
-│   │   ├── GameCube/        # 3D Logic (Cube, Modal, Scene)
-│   │   ├── portfolio/       # UI Components (D-Pad, Contact Form)
+│   │   ├── GameCube/        # 3D Logic (Cube, Modal, Scene, Canvas, Loader)
+│   │   ├── portfolio/       # UI Components (D-Pad, Contact, MDX, Mermaid, ScrollToTop)
+│   │   ├── seo/             # Open Graph templates & SVG logos
 │   │   └── ui/              # Reusable UI primitives
+│   ├── content/
+│   │   └── notes/           # MDX files grouped by category/subject
 │   ├── data/                # Content definitions (portfolioContent.ts)
 │   ├── hooks/               # Custom animation & interaction hooks
+│   ├── lib/                 # Utilities (boot.ts, bootJingle.ts, mdx.ts, navigation.ts)
 │   └── styles/              # Tailwind 4 & Global CSS
-├── public/                  # 3D models and static assets
+├── public/                  # 3D models, static assets, and CV PDF
 └── ...
 ```
 
@@ -114,6 +138,10 @@ portfolio-nextjs/
 - **3D Engine**: [Three.js](https://threejs.org/) / [React Three Fiber](https://docs.pmnd.rs/react-three-fiber)
 - **Styling**: [Tailwind CSS 4](https://tailwindcss.com/)
 - **Animations**: [Framer Motion](https://www.framer.com/motion/)
+- **Content**: [MDX](https://mdxjs.com/) (via `next-mdx-remote` & `gray-matter` & `remark-gfm`)
+- **Diagrams**: [Mermaid.js](https://mermaid.js.org/)
+- **Audio**: Web Audio API (Procedural sound synthesis)
+- **SEO & OG Images**: `@vercel/og` (`ImageResponse`)
 - **Email**: [Resend](https://resend.com/)
 - **Deployment**: [Vercel](https://vercel.com/)
 
@@ -126,3 +154,4 @@ This project is licensed under the MIT License - see the [LICENSE](LICENSE) file
 ---
 
 Built with 💜 by [Enrique Vazquez](https://github.com/TheBasol)
+

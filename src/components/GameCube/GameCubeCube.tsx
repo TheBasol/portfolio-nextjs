@@ -1,21 +1,32 @@
 "use client";
 
-import React, { useImperativeHandle, useRef } from "react";
+import React, { useEffect, useImperativeHandle, useRef } from "react";
 import { useFrame } from "@react-three/fiber";
 import { Text, RoundedBox, Html } from "@react-three/drei";
 import * as THREE from "three";
 import { CubePreview, type CubeSection } from "./CubePreview";
+import { isBootPreFall, type BootPhase } from "@/lib/boot";
 
 interface GameCubeCubeProps {
   targetQuaternion: THREE.Quaternion;
   interactionEnabled?: boolean;
   activeSection?: CubeSection | null;
   onOpen?: () => void;
+  bootPhase?: BootPhase;
+  onBootComplete?: () => void;
 }
 
 // Keep the HTML screen nearly flush with the physical 1.7-unit face.
 const FACE_HTML_SIZE = 480;
 const FACE_DISTANCE_FACTOR = 1.45;
+const FALL_START_Y = 8;
+const SPRING_STIFFNESS = 17;
+const SPRING_DAMPING = 6;
+const SPIN_DECAY_BASE = 0.55;
+const SETTLE_POS = 0.05;
+const SETTLE_VEL = 0.1;
+const SETTLE_ANGLE = 0.1;
+const ORIENT_PULL_MAX = 4.4;
 
 const FaceText = ({
   position,
@@ -93,24 +104,195 @@ const CubeFaceHtml = ({
 );
 
 export const GameCubeCube = React.forwardRef<THREE.Group, GameCubeCubeProps>(
-  ({ targetQuaternion, interactionEnabled = true, activeSection, onOpen }, ref) => {
+  (
+    {
+      targetQuaternion,
+      interactionEnabled = true,
+      activeSection,
+      onOpen,
+      bootPhase = "idle",
+      onBootComplete,
+    },
+    ref
+  ) => {
     const meshRef = useRef<THREE.Group>(null);
+    const outerMatRef = useRef<THREE.MeshPhysicalMaterial>(null);
+    const innerMatRef = useRef<THREE.MeshStandardMaterial>(null);
+    const impactLightRef = useRef<THREE.PointLight>(null);
     const reducedMotionRef = useRef(false);
+    const idleTimeRef = useRef(0);
     const _tempEuler = useRef(new THREE.Euler());
     const _tempQuat = useRef(new THREE.Quaternion());
     const _finalQuat = useRef(new THREE.Quaternion());
+    const _spinDelta = useRef(new THREE.Quaternion());
+    const _spinEuler = useRef(new THREE.Euler());
+
+    const fallState = useRef({
+      y: FALL_START_Y,
+      velY: 0,
+      spinX: 0,
+      spinY: 0,
+      spinZ: 0,
+      started: false,
+      impactFlashed: false,
+      completed: false,
+      flashT: 0,
+      elapsed: 0,
+    });
 
     useImperativeHandle(ref, () => meshRef.current as THREE.Group, []);
 
-    React.useEffect(() => {
+    useEffect(() => {
       reducedMotionRef.current = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
     }, []);
 
-    useFrame((state) => {
+    useEffect(() => {
+      const state = fallState.current;
+      if (bootPhase === "falling") {
+        state.y = FALL_START_Y;
+        state.velY = -4;
+        // Slower tumble — readable GameCube-style drop
+        state.spinX = 4.6;
+        state.spinY = 6.0;
+        state.spinZ = 3.5;
+        state.started = true;
+        state.impactFlashed = false;
+        state.completed = false;
+        state.flashT = 0;
+        state.elapsed = 0;
+        idleTimeRef.current = 0;
+        if (meshRef.current) {
+          meshRef.current.position.y = FALL_START_Y;
+          // Start tipped away from HOME so the tumble resolves into place
+          _spinEuler.current.set(2.1, -1.35, 0.9);
+          meshRef.current.quaternion.setFromEuler(_spinEuler.current);
+          meshRef.current.visible = true;
+        }
+      } else if (isBootPreFall(bootPhase)) {
+        state.started = false;
+        state.completed = false;
+        state.y = FALL_START_Y;
+        if (meshRef.current) {
+          meshRef.current.position.y = FALL_START_Y;
+          meshRef.current.visible = false;
+        }
+      } else if (bootPhase === "idle") {
+        state.completed = true;
+        state.y = 0;
+        idleTimeRef.current = 0;
+        if (meshRef.current) {
+          meshRef.current.position.y = 0;
+          meshRef.current.visible = true;
+        }
+      }
+    }, [bootPhase]);
+
+    useFrame((_state, delta) => {
       if (!meshRef.current) return;
 
-      const time = state.clock.elapsedTime;
       const reduced = reducedMotionRef.current;
+      const dt = Math.min(delta, 0.05);
+      const phase = bootPhase;
+      const fall = fallState.current;
+
+      if (isBootPreFall(phase)) {
+        meshRef.current.position.y = FALL_START_Y;
+        meshRef.current.visible = false;
+        return;
+      }
+
+      if (phase === "falling" && !fall.completed) {
+        meshRef.current.visible = true;
+
+        if (reduced) {
+          meshRef.current.position.y = 0;
+          meshRef.current.quaternion.copy(targetQuaternion);
+          fall.completed = true;
+          idleTimeRef.current = 0;
+          queueMicrotask(() => onBootComplete?.());
+          return;
+        }
+
+        fall.elapsed += dt;
+
+        // Spring toward y = 0
+        const force = -SPRING_STIFFNESS * fall.y - SPRING_DAMPING * fall.velY;
+        fall.velY += force * dt;
+        fall.y += fall.velY * dt;
+
+        // Closer to the ground → kill spin harder and pull toward HOME harder
+        const heightNorm = THREE.MathUtils.clamp(Math.abs(fall.y) / FALL_START_Y, 0, 1);
+        const groundFactor = 1 - heightNorm; // 0 at top, 1 at bottom
+        const approach = THREE.MathUtils.smoothstep(groundFactor, 0.42, 0.96);
+
+        const spinDecay = SPIN_DECAY_BASE + approach * 4;
+        const spinFade = Math.exp(-spinDecay * dt);
+        fall.spinX *= spinFade;
+        fall.spinY *= spinFade;
+        fall.spinZ *= spinFade;
+
+        _spinEuler.current.set(fall.spinX * dt, fall.spinY * dt, fall.spinZ * dt);
+        _spinDelta.current.setFromEuler(_spinEuler.current);
+        meshRef.current.quaternion.multiply(_spinDelta.current);
+
+        // Continuous orient pull — grows late so tumble reads longer
+        const orientPull = 0.15 + approach * ORIENT_PULL_MAX;
+        meshRef.current.quaternion.slerp(targetQuaternion, 1 - Math.exp(-orientPull * dt));
+
+        meshRef.current.position.y = fall.y;
+
+        if (!fall.impactFlashed && fall.y < 0.7 && fall.velY < 0) {
+          fall.impactFlashed = true;
+          fall.flashT = 1;
+        }
+
+        if (fall.flashT > 0) {
+          fall.flashT = Math.max(0, fall.flashT - dt * 1.8);
+          const intensity = fall.flashT * 3.2;
+          if (impactLightRef.current) {
+            impactLightRef.current.intensity = intensity;
+          }
+          if (outerMatRef.current) {
+            outerMatRef.current.emissiveIntensity = 0.2 + fall.flashT * 1.4;
+          }
+          if (innerMatRef.current) {
+            innerMatRef.current.emissiveIntensity = 1.2 + fall.flashT * 2.5;
+          }
+        } else if (impactLightRef.current) {
+          impactLightRef.current.intensity = 0;
+        }
+
+        const angle = meshRef.current.quaternion.angleTo(targetQuaternion);
+        const settled =
+          Math.abs(fall.y) < SETTLE_POS &&
+          Math.abs(fall.velY) < SETTLE_VEL &&
+          Math.abs(fall.spinX) + Math.abs(fall.spinY) + Math.abs(fall.spinZ) < 0.4 &&
+          angle < SETTLE_ANGLE;
+
+        if (settled || fall.elapsed > 3.5) {
+          fall.y = 0;
+          fall.velY = 0;
+          fall.spinX = 0;
+          fall.spinY = 0;
+          fall.spinZ = 0;
+          fall.completed = true;
+          meshRef.current.position.y = 0;
+          // Leave quaternion as-is (already near HOME); idle slerp finishes the last degrees
+          if (impactLightRef.current) impactLightRef.current.intensity = 0;
+          if (outerMatRef.current) {
+            outerMatRef.current.emissiveIntensity = activeSection ? 0.35 : 0.2;
+          }
+          if (innerMatRef.current) innerMatRef.current.emissiveIntensity = 1.2;
+          idleTimeRef.current = 0;
+          queueMicrotask(() => onBootComplete?.());
+        }
+        return;
+      }
+
+      // Idle float / wobble / face slerp — soft-start from idleTime = 0
+      meshRef.current.visible = true;
+      idleTimeRef.current += dt;
+      const time = idleTimeRef.current;
 
       meshRef.current.position.y = reduced ? 0 : Math.sin(time * 0.6) * 0.18;
 
@@ -118,8 +300,8 @@ export const GameCubeCube = React.forwardRef<THREE.Group, GameCubeCubeProps>(
       const wobbleY = reduced ? 0 : Math.cos(time * 0.5) * 0.04;
       const wobbleZ = reduced ? 0 : Math.sin(time * 0.4) * 0.06;
 
-      const mouseTiltX = interactionEnabled && !reduced ? -state.pointer.y * 0.05 : 0;
-      const mouseTiltY = interactionEnabled && !reduced ? state.pointer.x * 0.05 : 0;
+      const mouseTiltX = interactionEnabled && !reduced ? -_state.pointer.y * 0.05 : 0;
+      const mouseTiltY = interactionEnabled && !reduced ? _state.pointer.x * 0.05 : 0;
 
       _tempEuler.current.set(mouseTiltX + wobbleX, mouseTiltY + wobbleY, wobbleZ);
       _tempQuat.current.setFromEuler(_tempEuler.current);
@@ -140,11 +322,22 @@ export const GameCubeCube = React.forwardRef<THREE.Group, GameCubeCubeProps>(
     };
 
     const isActive = (s: CubeSection) => activeSection === s && interactionEnabled;
+    const baseEmissive = activeSection ? 0.35 : 0.2;
 
     return (
-      <group ref={meshRef}>
+      <group ref={meshRef} visible={bootPhase === "idle" || bootPhase === "falling"}>
+        <pointLight
+          ref={impactLightRef}
+          position={[0, 0, 0]}
+          color="#a855f7"
+          intensity={0}
+          distance={8}
+          decay={2}
+        />
+
         <RoundedBox args={[2, 2, 2]} radius={0.12} smoothness={4}>
           <meshPhysicalMaterial
+            ref={outerMatRef}
             color="#8b5cf6"
             thickness={1.5}
             roughness={0.1}
@@ -156,12 +349,13 @@ export const GameCubeCube = React.forwardRef<THREE.Group, GameCubeCubeProps>(
             metalness={0.1}
             clearcoat={1}
             emissive="#5d3fd3"
-            emissiveIntensity={activeSection ? 0.35 : 0.2}
+            emissiveIntensity={baseEmissive}
           />
         </RoundedBox>
 
         <RoundedBox args={[1.85, 1.85, 1.85]} radius={0.1} smoothness={4}>
           <meshStandardMaterial
+            ref={innerMatRef}
             color="#4c1d95"
             emissive="#7c3aed"
             emissiveIntensity={1.2}

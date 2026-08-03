@@ -8,6 +8,7 @@ import { GameCubeCube } from "@/components/GameCube/GameCubeCube";
 import { BackgroundCubes } from "@/components/GameCube/BackgroundCubes";
 import { type CubeSection } from "@/components/GameCube/CubePreview";
 import { type ViewState } from "@/lib/navigation";
+import type { BootPhase } from "@/lib/boot";
 import * as THREE from "three";
 
 function getSceneTransform(
@@ -55,6 +56,8 @@ function ResponsiveScene({
   activeSection,
   onOpen,
   view,
+  bootPhase,
+  onBootComplete,
 }: {
   targetQuaternion: THREE.Quaternion;
   interactionEnabled: boolean;
@@ -62,6 +65,8 @@ function ResponsiveScene({
   activeSection: CubeSection | null;
   onOpen: () => void;
   view: ViewState;
+  bootPhase: BootPhase;
+  onBootComplete: () => void;
 }) {
   const { size } = useThree();
   const { scale, y } = useMemo(
@@ -77,6 +82,8 @@ function ResponsiveScene({
         interactionEnabled={interactionEnabled}
         activeSection={activeSection}
         onOpen={onOpen}
+        bootPhase={bootPhase}
+        onBootComplete={onBootComplete}
       />
       <BackgroundCubes />
     </group>
@@ -91,6 +98,8 @@ interface PortfolioCanvasProps {
   onOpen: () => void;
   view: ViewState;
   isModalOpen: boolean;
+  bootPhase: BootPhase;
+  onBootComplete: () => void;
 }
 
 export default function PortfolioCanvas({
@@ -101,6 +110,8 @@ export default function PortfolioCanvas({
   onOpen,
   view,
   isModalOpen,
+  bootPhase,
+  onBootComplete,
 }: PortfolioCanvasProps) {
   return (
     <div
@@ -134,6 +145,8 @@ export default function PortfolioCanvas({
             activeSection={activeSection}
             onOpen={onOpen}
             view={view}
+            bootPhase={bootPhase}
+            onBootComplete={onBootComplete}
           />
 
           <ContactShadows

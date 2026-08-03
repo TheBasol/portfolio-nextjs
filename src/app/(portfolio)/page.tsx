@@ -1,5 +1,5 @@
 "use client";
-
+import Link from "next/link";
 import React, { useRef, useState, useEffect, useMemo, useCallback } from "react";
 import dynamic from "next/dynamic";
 import { SceneLoader } from "@/components/GameCube/SceneLoader";
@@ -12,6 +12,7 @@ import {
   isEditableTarget,
   SECTION_LABELS,
 } from "@/lib/navigation";
+import type { BootPhase } from "@/lib/boot";
 import * as THREE from "three";
 
 const DynamicCanvas = dynamic(
@@ -24,8 +25,13 @@ export default function Home() {
   const [targetQuaternion, setTargetQuaternion] = useState(new THREE.Quaternion());
   const [touchStart, setTouchStart] = useState<{ x: number; y: number } | null>(null);
   const [isModalOpen, setIsModalOpen] = useState(false);
+  const [bootPhase, setBootPhase] = useState<BootPhase>("loading");
   const cubeRef = useRef<THREE.Group | null>(null);
   const lastFocusedRef = useRef<HTMLElement | null>(null);
+  const bootCompleteFired = useRef(false);
+
+  const isBootIdle = bootPhase === "idle";
+  const showBootChrome = bootPhase === "falling" || bootPhase === "idle";
 
   const activeSection = useMemo(() => {
     if (view === "HOME") return null;
@@ -45,22 +51,62 @@ export default function Home() {
 
   const handleInput = useCallback(
     (key: string) => {
-      if (isModalOpen) return;
+      if (!isBootIdle || isModalOpen) return;
       setView((prev) => resolveViewFromInput(prev, key));
     },
-    [isModalOpen]
+    [isBootIdle, isModalOpen]
   );
 
   const openModal = useCallback(() => {
+    if (!isBootIdle) return;
     lastFocusedRef.current = document.activeElement as HTMLElement | null;
     setIsModalOpen(true);
-  }, []);
+  }, [isBootIdle]);
 
   const closeModal = useCallback(() => {
     setIsModalOpen(false);
     requestAnimationFrame(() => {
       lastFocusedRef.current?.focus();
     });
+  }, []);
+
+  const onReady = useCallback(() => {
+    setBootPhase((prev) => (prev === "loading" ? "ready" : prev));
+  }, []);
+
+  // Safety net: if the boot phase is stuck on "loading" for too long
+  // force the transition so the user is never stuck.
+  useEffect(() => {
+    if (bootPhase !== "loading") return;
+    const safety = setTimeout(() => {
+      const isFast = sessionStorage.getItem("portfolio_boot_seen") === "true";
+      setBootPhase((prev) => (prev === "loading" ? (isFast ? "idle" : "ready") : prev));
+    }, 5000);
+    return () => clearTimeout(safety);
+  }, [bootPhase]);
+
+  const onPowerOn = useCallback(() => {
+    const reduced = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+    if (reduced) {
+      setBootPhase("brand");
+      return;
+    }
+    setBootPhase("bootFlash");
+    window.setTimeout(() => {
+      setBootPhase((prev) => (prev === "bootFlash" ? "brand" : prev));
+    }, 550);
+  }, []);
+
+  const onBrandComplete = useCallback(() => {
+    bootCompleteFired.current = false;
+    setBootPhase("falling");
+  }, []);
+
+  const onBootComplete = useCallback(() => {
+    if (bootCompleteFired.current) return;
+    bootCompleteFired.current = true;
+    sessionStorage.setItem("portfolio_boot_seen", "true");
+    setBootPhase("idle");
   }, []);
 
   useEffect(() => {
@@ -77,7 +123,7 @@ export default function Home() {
         return;
       }
 
-      if (isModalOpen) return;
+      if (isModalOpen || !isBootIdle) return;
 
       if (key === "enter" && view !== "HOME") {
         e.preventDefault();
@@ -90,15 +136,15 @@ export default function Home() {
 
     window.addEventListener("keydown", handleKeyDown);
     return () => window.removeEventListener("keydown", handleKeyDown);
-  }, [closeModal, handleInput, isModalOpen, openModal, view]);
+  }, [closeModal, handleInput, isBootIdle, isModalOpen, openModal, view]);
 
   const onTouchStart = (e: React.TouchEvent) => {
-    if (isModalOpen) return;
+    if (!isBootIdle || isModalOpen) return;
     setTouchStart({ x: e.touches[0].clientX, y: e.touches[0].clientY });
   };
 
   const onTouchEnd = (e: React.TouchEvent) => {
-    if (isModalOpen) return;
+    if (!isBootIdle || isModalOpen) return;
     if (!touchStart) return;
     const dx = e.changedTouches[0].clientX - touchStart.x;
     const dy = e.changedTouches[0].clientY - touchStart.y;
@@ -124,9 +170,11 @@ export default function Home() {
   }, [view]);
 
   const liveMessage =
-    view === "HOME"
-      ? "Home screen. Select a section using arrows, WASD, swipe, or section buttons."
-      : `${SECTION_LABELS[view]} selected. Press Enter to open. Press opposite direction or center to return home.`;
+    !isBootIdle
+      ? "Boot sequence in progress."
+      : view === "HOME"
+        ? "Home screen. Select a section using arrows, WASD, swipe, or section buttons."
+        : `${SECTION_LABELS[view]} selected. Press Enter to open. Press opposite direction or center to return home.`;
 
   return (
     <main
@@ -135,7 +183,13 @@ export default function Home() {
       onTouchMove={() => {}}
       onTouchEnd={onTouchEnd}
     >
-      <SceneLoader />
+      <SceneLoader
+        bootPhase={bootPhase}
+        onReady={onReady}
+        onPowerOn={onPowerOn}
+        onBrandComplete={onBrandComplete}
+        onFastBootComplete={() => setBootPhase("idle")}
+      />
 
       <p className="sr-only" aria-live="polite" aria-atomic="true">
         {liveMessage}
@@ -143,8 +197,12 @@ export default function Home() {
 
       {/* Hero zone */}
       <div
-        className={`portfolio-hero-zone absolute top-0 left-0 right-0 z-10 px-4 sm:px-6 transition-all duration-700 pointer-events-none select-none
-          ${view === "HOME" ? "opacity-100 translate-y-0" : "opacity-0 -translate-y-16 pointer-events-none"}`}
+        className={`portfolio-hero-zone absolute top-0 left-0 right-0 z-10 px-4 sm:px-6 transition-all duration-1000 pointer-events-none select-none
+          ${
+            showBootChrome && view === "HOME"
+              ? "opacity-100 translate-y-0"
+              : "opacity-0 -translate-y-16 pointer-events-none"
+          }`}
       >
         <div className="mx-auto flex max-w-5xl flex-col items-center gap-1.5 sm:gap-2 md:gap-3 text-center">
           <div className="flex items-center gap-2 sm:gap-3">
@@ -180,57 +238,92 @@ export default function Home() {
         </div>
       </div>
 
-      {/* 3D Canvas — cargado dinámicamente */}
       <DynamicCanvas
         targetQuaternion={targetQuaternion}
-        interactionEnabled={!isModalOpen}
+        interactionEnabled={isBootIdle && !isModalOpen}
         cubeRef={cubeRef}
         activeSection={activeSection}
         onOpen={openModal}
         view={view}
         isModalOpen={isModalOpen}
+        bootPhase={bootPhase}
+        onBootComplete={onBootComplete}
       />
 
       <CubeModal isOpen={isModalOpen} section={activeSection} onClose={closeModal} />
 
       {/* HUD zone */}
-      <div className="portfolio-hud-zone absolute bottom-0 left-0 right-0 z-10 pointer-events-none px-3 sm:px-6 lg:px-10">
+      <div
+        className={`portfolio-hud-zone absolute bottom-0 left-0 right-0 z-10 pointer-events-none px-3 sm:px-6 lg:px-10 transition-opacity duration-1000
+          ${showBootChrome ? "opacity-100" : "opacity-0"}`}
+      >
         <div className="mx-auto grid w-full max-w-7xl grid-cols-1 items-end gap-3 lg:grid-cols-[1fr_auto_1fr] lg:gap-4">
           <div className="hidden lg:block portfolio-hud-meta uppercase tracking-widest" aria-hidden="true">
             SYSTEM VERSION 2026.04
           </div>
 
           <div className="flex flex-col items-center gap-2 pointer-events-auto lg:col-start-2">
-            <div className="flex items-center gap-2 border-t border-purple-500/30 px-3 py-1.5">
+            <div className="px-3 py-1.5 border-t border-purple-500/30">
               <span className="portfolio-hud-functional cube-ui-mono text-[11px] sm:text-xs tracking-[0.16em] uppercase text-center">
                 {view === "HOME" ? "Select Section" : `View: ${view}`}
               </span>
-              <span className="text-purple-300/50 text-xs" aria-hidden="true">
+              <span className="text-purple-300/50 text-xs ml-2" aria-hidden="true">
                 {view === "HOME" ? "↕" : "↵"}
               </span>
             </div>
           </div>
 
-          <div className="hidden lg:flex justify-end items-end gap-4 pr-[calc(3rem+4.5rem)]">
-            <div className="portfolio-hud-meta uppercase tracking-widest text-right" aria-hidden="true">
-              MEM CARD: SLOT A EMPTY
-              <br />
-              DISC: PORTFOLIO_V1
+          <div className="flex justify-center lg:justify-end items-end gap-4 lg:pr-[calc(3rem+4.5rem)] pointer-events-auto mt-2 lg:mt-0">
+            <div className="portfolio-hud-meta text-center lg:text-right">
+              <Link
+                href="/notes"
+                className="group inline-flex items-center gap-2 px-3 py-1.5 sm:px-4 sm:py-2 bg-purple-500/10 hover:bg-purple-500/30 border border-purple-500/30 hover:border-cyan-400/60 rounded-md backdrop-blur-sm transition-all shadow-[0_0_15px_rgba(168,85,247,0.2)] hover:shadow-[0_0_25px_rgba(34,211,238,0.3)]"
+                tabIndex={isBootIdle ? 0 : -1}
+              >
+                <div className="w-1.5 h-1.5 rounded-full bg-cyan-400 animate-pulse" />
+                <span className="cube-ui-mono text-[10px] sm:text-xs text-white group-hover:text-cyan-100 uppercase tracking-widest">
+                  Memory Card (Notes)
+                </span>
+              </Link>
+              <div className="hidden lg:block text-[9px] text-slate-500 uppercase tracking-widest mt-2">
+                DISC: PORTFOLIO_V1
+              </div>
             </div>
           </div>
         </div>
       </div>
 
       {/* D-Pad */}
-      <div className="absolute bottom-[var(--portfolio-safe-bottom)] right-3 sm:right-6 lg:right-10 z-20 pointer-events-auto">
+      <div
+        className={`absolute bottom-[var(--portfolio-safe-bottom)] right-3 sm:right-6 lg:right-10 z-20 transition-opacity duration-1000
+          ${showBootChrome ? "opacity-100" : "opacity-0"} ${
+            isBootIdle ? "pointer-events-auto" : "pointer-events-none"
+          }`}
+      >
         <NavigationGuide currentView={view} onNavigate={handleInput} />
       </div>
 
       {/* Decorative corners */}
-      <div className="hidden md:block absolute top-0 left-0 w-20 h-20 border-t border-l border-purple-500/20 m-6 pointer-events-none" />
-      <div className="hidden md:block absolute top-0 right-0 w-20 h-20 border-t border-r border-purple-500/20 m-6 pointer-events-none" />
-      <div className="hidden md:block absolute bottom-0 left-0 w-20 h-20 border-b border-l border-purple-500/20 m-6 pointer-events-none" />
-      <div className="hidden md:block absolute bottom-0 right-0 w-20 h-20 border-b border-r border-purple-500/20 m-6 pointer-events-none" />
+      <div
+        className={`hidden md:block absolute top-0 left-0 w-20 h-20 border-t border-l border-purple-500/20 m-6 pointer-events-none transition-opacity duration-1000 ${
+          showBootChrome ? "opacity-100" : "opacity-0"
+        }`}
+      />
+      <div
+        className={`hidden md:block absolute top-0 right-0 w-20 h-20 border-t border-r border-purple-500/20 m-6 pointer-events-none transition-opacity duration-1000 ${
+          showBootChrome ? "opacity-100" : "opacity-0"
+        }`}
+      />
+      <div
+        className={`hidden md:block absolute bottom-0 left-0 w-20 h-20 border-b border-l border-purple-500/20 m-6 pointer-events-none transition-opacity duration-1000 ${
+          showBootChrome ? "opacity-100" : "opacity-0"
+        }`}
+      />
+      <div
+        className={`hidden md:block absolute bottom-0 right-0 w-20 h-20 border-b border-r border-purple-500/20 m-6 pointer-events-none transition-opacity duration-1000 ${
+          showBootChrome ? "opacity-100" : "opacity-0"
+        }`}
+      />
     </main>
   );
 }
