@@ -1,7 +1,45 @@
 /**
- * Original short boot motif (not the Nintendo GameCube jingle).
- * Must be called from a user gesture so AudioContext can start.
- * Tempo stretched to sit under the cube fall (~15% snappier than prior tuning).
+ * Short tactile console power-button chirp on click.
+ */
+export function playPowerSwitchSound(options?: { muted?: boolean }): void {
+  if (options?.muted) return;
+  if (typeof window === "undefined") return;
+
+  const AudioCtx =
+    window.AudioContext ||
+    (window as unknown as { webkitAudioContext?: typeof AudioContext }).webkitAudioContext;
+  if (!AudioCtx) return;
+
+  let ctx: AudioContext;
+  try {
+    ctx = new AudioCtx();
+  } catch {
+    return;
+  }
+
+  void ctx.resume().then(() => {
+    const osc = ctx.createOscillator();
+    const gain = ctx.createGain();
+    osc.type = "sine";
+    const t0 = ctx.currentTime;
+    osc.frequency.setValueAtTime(520, t0);
+    osc.frequency.exponentialRampToValueAtTime(880, t0 + 0.09);
+    gain.gain.setValueAtTime(0.0001, t0);
+    gain.gain.exponentialRampToValueAtTime(0.16, t0 + 0.015);
+    gain.gain.exponentialRampToValueAtTime(0.0001, t0 + 0.12);
+    osc.connect(gain);
+    gain.connect(ctx.destination);
+    osc.start(t0);
+    osc.stop(t0 + 0.14);
+    window.setTimeout(() => {
+      void ctx.close();
+    }, 300);
+  });
+}
+
+/**
+ * Original GameCube-inspired boot motif (synthesized via Web Audio API).
+ * Synchronized with the 3D cube tumble and landing impact (~0.85s).
  */
 export function playBootJingle(options?: { muted?: boolean }): void {
   if (options?.muted) return;
@@ -20,26 +58,34 @@ export function playBootJingle(options?: { muted?: boolean }): void {
   }
 
   const master = ctx.createGain();
-  master.gain.value = 0.22;
+  master.gain.value = 0.24;
   master.connect(ctx.destination);
 
-  // Ascending four-note motif — same pitches, stretched timing for the longer fall.
+  // Sparkling marimba-like arpeggio during the 3D tumble, resolving on landing (~0.85s)
   const notes = [
-    { freq: 392.0, start: 0.0, dur: 0.24 }, // G4
-    { freq: 493.88, start: 0.21, dur: 0.24 }, // B4
-    { freq: 587.33, start: 0.43, dur: 0.24 }, // D5
-    { freq: 783.99, start: 0.7, dur: 0.74 }, // G5
+    { freq: 392.0, start: 0.04, dur: 0.2 }, // G4
+    { freq: 440.0, start: 0.18, dur: 0.2 }, // A4
+    { freq: 493.88, start: 0.32, dur: 0.2 }, // B4
+    { freq: 587.33, start: 0.46, dur: 0.22 }, // D5
+    { freq: 659.25, start: 0.6, dur: 0.22 }, // E5
+    { freq: 783.99, start: 0.78, dur: 0.9 }, // G5 (landing resolution)
   ];
 
-  const playTone = (freq: number, start: number, dur: number) => {
+  const playTone = (
+    freq: number,
+    start: number,
+    dur: number,
+    type: OscillatorType = "triangle",
+    peak = 0.75
+  ) => {
     const osc = ctx.createOscillator();
     const gain = ctx.createGain();
-    osc.type = "triangle";
+    osc.type = type;
     osc.frequency.setValueAtTime(freq, ctx.currentTime + start);
 
     const t0 = ctx.currentTime + start;
     gain.gain.setValueAtTime(0.0001, t0);
-    gain.gain.exponentialRampToValueAtTime(0.85, t0 + 0.04);
+    gain.gain.exponentialRampToValueAtTime(peak, t0 + 0.025);
     gain.gain.exponentialRampToValueAtTime(0.0001, t0 + dur);
 
     osc.connect(gain);
@@ -50,23 +96,31 @@ export function playBootJingle(options?: { muted?: boolean }): void {
 
   void ctx.resume().then(() => {
     for (const note of notes) {
-      playTone(note.freq, note.start, note.dur);
+      playTone(note.freq, note.start, note.dur, "triangle", 0.8);
     }
-    // Soft harmonic pad under the last note
-    const pad = ctx.createOscillator();
-    const padGain = ctx.createGain();
-    pad.type = "sine";
-    pad.frequency.setValueAtTime(196.0, ctx.currentTime + 0.68);
-    padGain.gain.setValueAtTime(0.0001, ctx.currentTime + 0.68);
-    padGain.gain.exponentialRampToValueAtTime(0.2, ctx.currentTime + 0.75);
-    padGain.gain.exponentialRampToValueAtTime(0.0001, ctx.currentTime + 1.55);
-    pad.connect(padGain);
-    padGain.connect(master);
-    pad.start(ctx.currentTime + 0.68);
-    pad.stop(ctx.currentTime + 1.65);
+
+    // Warm resonant chord + bass thump on cube landing (~0.78s)
+    playTone(392.0, 0.78, 0.95, "sine", 0.35); // G4
+    playTone(493.88, 0.78, 0.95, "sine", 0.3); // B4
+    playTone(196.0, 0.78, 1.05, "sine", 0.45); // G3 bass pad
+
+    // Subtle percussive sub-thump on impact
+    const thump = ctx.createOscillator();
+    const thumpGain = ctx.createGain();
+    const tImpact = ctx.currentTime + 0.78;
+    thump.type = "sine";
+    thump.frequency.setValueAtTime(140, tImpact);
+    thump.frequency.exponentialRampToValueAtTime(42, tImpact + 0.22);
+    thumpGain.gain.setValueAtTime(0.0001, tImpact);
+    thumpGain.gain.exponentialRampToValueAtTime(0.55, tImpact + 0.015);
+    thumpGain.gain.exponentialRampToValueAtTime(0.0001, tImpact + 0.26);
+    thump.connect(thumpGain);
+    thumpGain.connect(master);
+    thump.start(tImpact);
+    thump.stop(tImpact + 0.3);
 
     window.setTimeout(() => {
       void ctx.close();
-    }, 2000);
+    }, 2200);
   });
 }

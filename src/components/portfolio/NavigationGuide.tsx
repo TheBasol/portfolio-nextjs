@@ -2,6 +2,7 @@
 
 import React from "react";
 import type { ViewState } from "@/lib/navigation";
+import { SECTION_ACCENTS } from "@/components/GameCube/CubePreview";
 
 interface NavigationGuideProps {
   currentView: ViewState;
@@ -34,7 +35,15 @@ export const NavigationGuide: React.FC<NavigationGuideProps> = ({ currentView, o
   };
 
   return (
-    <div className="flex flex-col items-center justify-center select-none drop-shadow-2xl" aria-label="Directional navigation pad">
+    <div
+      className="dpad flex flex-col items-center justify-center select-none"
+      aria-label="Directional navigation pad"
+      style={
+        {
+          "--dpad-accent-rgb": isHome ? "139, 92, 246" : SECTION_ACCENTS[currentView].rgb,
+        } as React.CSSProperties
+      }
+    >
       <button
         type="button"
         className={`relative ${getButtonClass(currentView === "PROJECTS", "up")}`}
@@ -64,11 +73,7 @@ export const NavigationGuide: React.FC<NavigationGuideProps> = ({ currentView, o
           onClick={handleCenter}
           aria-label={centerLabel}
         >
-          <div
-            className={`w-2.5 h-2.5 md:w-3 md:h-3 rounded-full transition-all duration-300 ${
-              isHome ? "bg-purple-400 shadow-[0_0_8px_rgba(168,85,247,0.6)]" : "bg-white/25"
-            }`}
-          />
+          <div className={`dpad-center-dot ${isHome ? "dpad-center-dot-active" : ""}`} />
           <span className="dpad-label cube-ui-mono">{centerLabel}</span>
         </button>
 

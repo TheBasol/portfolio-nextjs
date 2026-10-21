@@ -28,99 +28,142 @@ const menuTabs: Array<{ id: CubeSection; label: string }> = [
   { id: "CONTACT", label: "Contact" },
 ];
 
+export const SECTION_ACCENTS: Record<
+  CubeSection,
+  { hex: string; rgb: string; index: string; slotCode: string }
+> = {
+  PROJECTS: { hex: "#22d3ee", rgb: "34, 211, 238", index: "01", slotCode: "SLOT_A // ARCHIVES" },
+  ABOUT: { hex: "#fb923c", rgb: "251, 146, 60", index: "02", slotCode: "SLOT_B // PROFILE" },
+  EXPERIENCE: { hex: "#34d399", rgb: "52, 211, 153", index: "03", slotCode: "SLOT_C // RECORDS" },
+  CONTACT: { hex: "#c084fc", rgb: "192, 132, 252", index: "04", slotCode: "SLOT_D // COMMS" },
+};
+
+const faceDescription: Record<CubeSection, string> = {
+  PROJECTS: "Accessing stored development archives and deployed AI applications.",
+  ABOUT: "Operator profile, technical architecture focus, and background.",
+  EXPERIENCE: "Career trajectory, engineering leadership, and core competencies.",
+  CONTACT: "Direct communication channel ready for project & role inquiries.",
+};
+
+const FaceHighlight = ({ section }: { section: CubeSection }) => {
+  if (section === "PROJECTS") {
+    const project = projects[0];
+    return (
+      <div className="cube-face-highlight">
+        <div className="relative h-20 w-32 shrink-0 overflow-hidden rounded-xl border border-white/20 shadow-md">
+          <Image src={project.imageUrl} alt={project.title} fill sizes="128px" className="object-cover object-top" />
+        </div>
+        <div className="min-w-0 flex-1">
+          <p className="cube-face-highlight-label">LATEST BUILD // 01</p>
+          <p className="truncate text-xl font-bold text-white tracking-tight">{project.title}</p>
+          <div className="mt-2 flex items-center gap-2">
+            {project.tags.slice(0, 4).map((tag) => (
+              <span
+                key={tag}
+                className={`flex items-center justify-center h-7 w-7 rounded-lg bg-white/[0.06] border border-white/10 ${getTechColor(tag)}`}
+                title={tag}
+              >
+                <TechIcon name={tag} className="h-4 w-4" />
+              </span>
+            ))}
+          </div>
+        </div>
+      </div>
+    );
+  }
+
+  if (section === "ABOUT") {
+    return (
+      <div className="cube-face-highlight">
+        {aboutContent.imageUrl && (
+          <div className="relative h-20 w-20 shrink-0 overflow-hidden rounded-2xl border border-white/20 shadow-md">
+            <Image src={aboutContent.imageUrl} alt="Enrique Vázquez" fill sizes="80px" className="object-cover" />
+          </div>
+        )}
+        <div className="min-w-0 flex-1">
+          <p className="cube-face-highlight-label">OPERATOR // ID_01</p>
+          <p className="truncate text-xl font-bold text-white tracking-tight">Enrique Vázquez</p>
+          <p className="truncate text-sm font-semibold text-slate-200 mt-0.5">Full-Stack Engineer & Founder</p>
+          <p className="truncate text-xs text-slate-400 mt-1">Architecture · Scalable Cloud & AI Platforms</p>
+        </div>
+      </div>
+    );
+  }
+
+  if (section === "EXPERIENCE") {
+    const current = experience[0];
+    return (
+      <div className="cube-face-highlight">
+        <div className="relative h-20 w-20 shrink-0 rounded-2xl bg-white/[0.05] border border-white/15 flex flex-col items-center justify-center text-[color:var(--face-accent)] shadow-inner gap-1">
+          <svg viewBox="0 0 24 24" className="w-8 h-8" fill="none" stroke="currentColor" strokeWidth="1.8">
+            <rect x="2" y="7" width="20" height="14" rx="2" ry="2" />
+            <path d="M16 21V5a2 2 0 0 0-2-2h-4a2 2 0 0 0-2 2v16" />
+          </svg>
+          <span className="text-[10px] font-mono uppercase tracking-wider text-emerald-400 font-semibold">2026</span>
+        </div>
+        <div className="min-w-0 flex-1">
+          <p className="cube-face-highlight-label">ACTIVE LOG // 2026</p>
+          <p className="truncate text-lg font-bold text-white tracking-tight leading-snug">{current.subtitle}</p>
+          <p className="truncate text-sm text-slate-300 mt-0.5">{current.title}</p>
+          <p className="truncate text-xs text-emerald-400/90 font-mono mt-1">● Present · Full-Stack Lead</p>
+        </div>
+      </div>
+    );
+  }
+
+  return (
+    <div className="cube-face-highlight">
+      <div className="relative h-20 w-20 shrink-0 rounded-2xl bg-white/[0.05] border border-white/15 flex flex-col items-center justify-center text-[color:var(--face-accent)] shadow-inner gap-1">
+        <svg viewBox="0 0 24 24" className="w-8 h-8" fill="none" stroke="currentColor" strokeWidth="1.8">
+          <path d="M4 6h16v12H4z" strokeLinejoin="round" />
+          <path d="m4 7 8 6 8-6" strokeLinejoin="round" />
+        </svg>
+        <span className="flex items-center gap-1 text-[10px] font-mono uppercase tracking-wider text-purple-300 font-semibold">
+          <span className="w-1.5 h-1.5 rounded-full bg-emerald-400 animate-pulse" />
+          LIVE
+        </span>
+      </div>
+      <div className="min-w-0 flex-1">
+        <p className="cube-face-highlight-label">SIGNAL LINK // ONLINE</p>
+        <p className="truncate text-xl font-bold text-white tracking-tight">Direct Transmission Ready</p>
+        <p className="truncate text-sm text-slate-300 mt-0.5">Open for project & role inquiries</p>
+        <p className="truncate text-xs text-purple-300/80 font-mono mt-1">Response time &lt; 24h · Remote & Global</p>
+      </div>
+    </div>
+  );
+};
+
 export const CubePreview = ({ section, onOpen, anchor, isEmbedded }: CubePreviewProps) => {
   if (isEmbedded) {
-    const accentBorder = {
-      PROJECTS: "border-cyan-400/30",
-      ABOUT: "border-orange-400/30",
-      EXPERIENCE: "border-emerald-400/30",
-      CONTACT: "border-slate-400/30",
-    }[section];
-
-    const accentText = {
-      PROJECTS: "text-cyan-300",
-      ABOUT: "text-orange-300",
-      EXPERIENCE: "text-emerald-300",
-      CONTACT: "text-slate-200",
-    }[section];
-
-    const accentGlow = {
-      PROJECTS: "rgba(6, 182, 212, 0.08)",
-      ABOUT: "rgba(249, 115, 22, 0.08)",
-      EXPERIENCE: "rgba(16, 185, 129, 0.08)",
-      CONTACT: "rgba(148, 163, 184, 0.06)",
-    }[section];
+    const accent = SECTION_ACCENTS[section];
 
     return (
       <div
-        className={`cube-face-embedded flex h-full w-full flex-col border ${accentBorder} rounded-xl p-6 text-white select-none pointer-events-auto overflow-hidden relative`}
-        style={{
-          background: `radial-gradient(ellipse at 50% 0%, ${accentGlow}, transparent 62%), linear-gradient(155deg, rgba(33, 18, 72, 0.58), rgba(8, 10, 25, 0.48))`,
-        }}
+        className="cube-face-card cube-ui relative flex h-full w-full select-none flex-col overflow-hidden p-7 text-white pointer-events-auto"
+        style={
+          {
+            "--face-accent": accent.hex,
+            "--face-accent-rgb": accent.rgb,
+          } as React.CSSProperties
+        }
       >
         <div className="cube-face-scan-overlay" />
-        <div className="absolute inset-0 pointer-events-none bg-[linear-gradient(rgba(18,16,16,0)_50%,rgba(0,0,0,0.06)_50%)] bg-[length:100%_4px] opacity-25 rounded-[inherit]" />
+        <div className="absolute inset-0 pointer-events-none bg-[linear-gradient(rgba(18,16,16,0)_50%,rgba(0,0,0,0.12)_50%)] bg-[length:100%_4px] opacity-10 rounded-[inherit]" />
 
-        <div className="relative z-10 flex flex-1 flex-col justify-between gap-3">
-          <div className="space-y-1.5">
-            <div className="flex items-center gap-2">
-              <div className={`h-1.5 w-1.5 rounded-full ${accentText.replace("text", "bg")} animate-pulse`} />
-              <p className="cube-ui-mono text-sm uppercase tracking-[0.16em] text-white/80">
-                Section Preview
-              </p>
-            </div>
+        <div className="relative z-10 flex flex-1 flex-col justify-between h-full">
+          <div className="space-y-2.5">
             <h3
-              className={`cube-face-embedded-title font-black tracking-tighter italic ${accentText}`}
-              style={{ textShadow: `0 0 16px ${accentGlow}` }}
+              className="cube-face-embedded-title font-black italic tracking-tight uppercase text-[color:var(--face-accent)]"
+              style={{ textShadow: `0 0 24px rgba(${accent.rgb}, 0.35)` }}
             >
-              {sectionTitle[section].toUpperCase()}
+              {sectionTitle[section]}
             </h3>
-          </div>
-
-          <div className="flex flex-col gap-3">
-            <p className="text-xl text-slate-100/95 leading-snug">
-              {section === "PROJECTS" && "Accessing stored development archives and project data."}
-              {section === "ABOUT" && "Initializing biographical summary and technical background."}
-              {section === "EXPERIENCE" && "Retrieving career trajectory and core competencies."}
-              {section === "CONTACT" && "Establishing direct communication channel for inquiries."}
+            <p className="text-[15px] leading-relaxed text-slate-200/90 font-medium">
+              {faceDescription[section]}
             </p>
-
-            <div className="grid grid-cols-1 gap-2">
-              {section === "PROJECTS" &&
-                projects.slice(0, 1).map((p) => (
-                  <div key={p.title} className="bg-white/8 border border-white/15 rounded-lg p-3">
-                    <p className="text-xs cube-ui-mono text-white/65 uppercase mb-1">Latest archive</p>
-                    <p className="text-xl font-semibold leading-tight line-clamp-2">{p.title}</p>
-                  </div>
-                ))}
-              {section === "EXPERIENCE" &&
-                experience.slice(0, 1).map((exp) => (
-                  <div key={exp.title} className="bg-white/8 border border-white/15 rounded-lg p-3">
-                    <p className="text-xs cube-ui-mono text-white/65 uppercase mb-1">Current role</p>
-                    <p className="text-xl font-semibold leading-tight line-clamp-2">{exp.title}</p>
-                  </div>
-                ))}
-              {section === "ABOUT" && (
-                <div className="bg-white/5 border border-white/10 rounded-lg p-3">
-                  <p className="text-sm cube-ui-mono text-white/65 uppercase mb-2">Developer Bio</p>
-                  <div className="h-1.5 w-full bg-white/5 rounded-full overflow-hidden">
-                    <div className="h-full bg-orange-500 w-[85%]" />
-                  </div>
-                </div>
-              )}
-              {section === "CONTACT" && (
-                <div className="flex items-center gap-3 bg-white/5 border border-white/10 rounded-lg p-3">
-                  <div className="h-10 w-10 rounded-md bg-slate-500/10 border border-white/10 flex items-center justify-center shrink-0">
-                    <div className="h-5 w-5 border-2 border-slate-300 rounded-full border-t-transparent animate-spin" />
-                  </div>
-                  <div>
-                    <p className="text-lg font-semibold leading-tight">Signal Connection Ready</p>
-                    <p className="text-xs cube-ui-mono text-white/60 uppercase">Awaiting Input</p>
-                  </div>
-                </div>
-              )}
-            </div>
           </div>
+
+          <FaceHighlight section={section} />
 
           <button
             type="button"
@@ -128,17 +171,17 @@ export const CubePreview = ({ section, onOpen, anchor, isEmbedded }: CubePreview
               e.stopPropagation();
               onOpen();
             }}
-            className={`group/btn relative w-full py-4 rounded-lg bg-white/5 border ${accentBorder} overflow-hidden transition-all hover:bg-white/10 active:scale-[0.98]`}
+            className="cube-face-cta group/btn"
           >
-            <div className="relative z-10 flex items-center justify-center gap-2.5">
-              <span className={`text-xl font-black italic tracking-[0.15em] uppercase ${accentText}`}>
-                Open
+            <span className="text-[14px] font-bold tracking-[0.18em] uppercase">
+              OPEN {sectionTitle[section]}
+            </span>
+            <span className="flex items-center gap-2.5">
+              <kbd className="cube-face-kbd cube-ui-mono">A / ENTER</kbd>
+              <span className="transition-transform duration-300 group-hover/btn:translate-x-1.5" aria-hidden="true">
+                →
               </span>
-              <span className="cube-ui-mono text-xs text-white/65 uppercase px-2 py-0.5 rounded-full border border-white/10 bg-white/5">
-                Enter
-              </span>
-            </div>
-            <div className="absolute inset-0 bg-gradient-to-r from-transparent via-white/5 to-transparent -translate-x-full group-hover/btn:translate-x-full transition-transform duration-700" />
+            </span>
           </button>
         </div>
       </div>

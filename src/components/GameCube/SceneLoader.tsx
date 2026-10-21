@@ -1,12 +1,9 @@
 "use client";
 
-import React, { useEffect, useLayoutEffect, useRef, useState } from "react";
+import React, { useCallback, useEffect, useRef, useState } from "react";
 import { useProgress } from "@react-three/drei";
-import { playBootJingle } from "@/lib/bootJingle";
+import { playBootJingle, playPowerSwitchSound } from "@/lib/bootJingle";
 import type { BootPhase } from "@/lib/boot";
-
-const useIsomorphicLayoutEffect =
-  typeof window !== "undefined" ? useLayoutEffect : useEffect;
 
 interface SceneLoaderProps {
   bootPhase: BootPhase;
@@ -21,55 +18,98 @@ export function SceneLoader({
   onReady,
   onPowerOn,
   onBrandComplete,
-  onFastBootComplete,
 }: SceneLoaderProps) {
   const { progress } = useProgress();
-  const [isFastBoot, setIsFastBoot] = useState(false);
-  const [statusText, setStatusText] = useState("INITIALIZING_SYSTEM");
+  const progressRef = useRef(progress);
+  const [visualProgress, setVisualProgress] = useState(0);
+  const [statusText, setStatusText] = useState("CHECKING_SYSTEM_MEMORY");
   const [reducedMotion, setReducedMotion] = useState(false);
   const [brandFading, setBrandFading] = useState(false);
   const [overlayFading, setOverlayFading] = useState(false);
+
   const readyFired = useRef(false);
   const sequenceStarted = useRef(false);
   const brandCompleteFired = useRef(false);
+
+  const onReadyRef = useRef(onReady);
+  const onBrandCompleteRef = useRef(onBrandComplete);
+  useEffect(() => {
+    onReadyRef.current = onReady;
+    onBrandCompleteRef.current = onBrandComplete;
+  }, [onReady, onBrandComplete]);
+
+  // Keep progressRef updated without re-triggering the animation loop
+  useEffect(() => {
+    progressRef.current = progress;
+  }, [progress]);
 
   useEffect(() => {
     setReducedMotion(window.matchMedia("(prefers-reduced-motion: reduce)").matches);
   }, []);
 
+  // Reset internal guards if a reboot is triggered from the HUD
   useEffect(() => {
-    if (progress < 20) setStatusText("CONNECTING_TO_KERNEL");
-    else if (progress < 40) setStatusText("MOUNTING_DISC_IMAGE");
-    else if (progress < 60) setStatusText("READING_MEM_CARD_A");
-    else if (progress < 80) setStatusText("STREAMING_GEOMETRY");
-    else if (progress < 100) setStatusText("COMPILING_SHADERS");
-    else setStatusText("SYSTEM_READY");
-  }, [progress]);
-
-  // Fire onReady once progress reaches 100.
-  // Using layout effect so we catch the case where progress is already 100
-  // on mount (assets cached from a previous visit / back-navigation).
-  useIsomorphicLayoutEffect(() => {
-    const isFast = sessionStorage.getItem("portfolio_boot_seen") === "true";
-    setIsFastBoot(isFast);
-
-    if (progress >= 100 && !readyFired.current) {
-      readyFired.current = true;
-      let timer: NodeJS.Timeout;
-      
-      if (isFast && onFastBootComplete) {
-        setOverlayFading(true);
-        timer = setTimeout(() => onFastBootComplete(), 400);
-      } else {
-        timer = setTimeout(() => onReady(), 400);
-      }
-      
-      return () => {
-        clearTimeout(timer);
-        readyFired.current = false;
-      };
+    if (bootPhase === "loading") {
+      readyFired.current = false;
+      sequenceStarted.current = false;
+      brandCompleteFired.current = false;
+      setOverlayFading(false);
+      setBrandFading(false);
+      setVisualProgress(0);
+    } else if (bootPhase === "ready") {
+      sequenceStarted.current = false;
+      brandCompleteFired.current = false;
+      setOverlayFading(false);
+      setBrandFading(false);
     }
-  }, [progress, onReady, onFastBootComplete]);
+  }, [bootPhase]);
+
+  // Sync status text with animated visual progress
+  useEffect(() => {
+    if (visualProgress < 25) setStatusText("CHECKING_SYSTEM_MEMORY");
+    else if (visualProgress < 50) setStatusText("MOUNTING_OPTICAL_DISC");
+    else if (visualProgress < 75) setStatusText("READING_MEMORY_CARD_A");
+    else if (visualProgress < 98) setStatusText("STREAMING_CUBE_SHADERS");
+    else setStatusText("BIOS_SYSTEM_READY");
+  }, [visualProgress]);
+
+  // Smooth 2-second loader animation before transitioning to 'ready'
+  useEffect(() => {
+    if (bootPhase !== "loading") return;
+
+    let startTime: number | null = null;
+    const duration = 2000; // 2 seconds animation
+    let animId: number;
+
+    const step = (timestamp: number) => {
+      if (startTime === null) startTime = timestamp;
+      const elapsed = timestamp - startTime;
+      const timePercent = Math.min(100, (elapsed / duration) * 100);
+
+      // Advance visual progress smoothly up to 90% if three.js progress is still loading
+      const currentThreeProgress = progressRef.current;
+      const cap = currentThreeProgress >= 100 ? 100 : 90;
+      const targetPercent = Math.min(timePercent, cap);
+
+      // Monotonically increase visual progress: it can NEVER decrease!
+      setVisualProgress((prev) => Math.max(prev, targetPercent));
+
+      if (elapsed < duration || currentThreeProgress < 100 || targetPercent < 100) {
+        animId = requestAnimationFrame(step);
+      } else {
+        setVisualProgress(100);
+        if (!readyFired.current) {
+          readyFired.current = true;
+          setTimeout(() => {
+            onReadyRef.current();
+          }, 200);
+        }
+      }
+    };
+
+    animId = requestAnimationFrame(step);
+    return () => cancelAnimationFrame(animId);
+  }, [bootPhase]);
 
   // Brand beat → fade overlay → hand off to cube fall
   useEffect(() => {
@@ -81,46 +121,50 @@ export function SceneLoader({
         if (brandCompleteFired.current) return;
         brandCompleteFired.current = true;
         setOverlayFading(true);
-        setTimeout(() => onBrandComplete(), 150);
+        setTimeout(() => onBrandCompleteRef.current(), 150);
       }, 100);
       return () => clearTimeout(t);
     }
 
     setBrandFading(false);
-    const hold = setTimeout(() => setBrandFading(true), 500);
+    const hold = setTimeout(() => setBrandFading(true), 380);
     const done = setTimeout(() => {
       if (brandCompleteFired.current) return;
       brandCompleteFired.current = true;
       setOverlayFading(true);
-      setTimeout(() => onBrandComplete(), 400);
-    }, 800);
+      playBootJingle({ muted: reducedMotion });
+      setTimeout(() => onBrandCompleteRef.current(), 220);
+    }, 620);
 
     return () => {
       clearTimeout(hold);
       clearTimeout(done);
       brandCompleteFired.current = false;
     };
-  }, [bootPhase, reducedMotion, onBrandComplete]);
+  }, [bootPhase, reducedMotion]);
 
-  const handlePowerOn = () => {
+  const handlePowerOn = useCallback(() => {
     if (sequenceStarted.current || bootPhase !== "ready") return;
     sequenceStarted.current = true;
-    playBootJingle({ muted: reducedMotion });
+    playPowerSwitchSound({ muted: reducedMotion });
     onPowerOn();
-  };
+  }, [bootPhase, onPowerOn, reducedMotion]);
+
+  // Allow pressing Enter or Space to Power On like pressing Start on a controller
+  useEffect(() => {
+    if (bootPhase !== "ready") return;
+    const onKey = (e: KeyboardEvent) => {
+      if (e.key === "Enter" || e.key === " ") {
+        e.preventDefault();
+        handlePowerOn();
+      }
+    };
+    window.addEventListener("keydown", onKey);
+    return () => window.removeEventListener("keydown", onKey);
+  }, [bootPhase, handlePowerOn]);
 
   // Overlay gone once cube is falling / idle
   if (bootPhase === "falling" || bootPhase === "idle") return null;
-
-  if (isFastBoot) {
-    return (
-      <div
-        className={`fixed inset-0 z-[100] bg-[#060606] transition-opacity duration-[400ms] ease-out
-          ${overlayFading ? "opacity-0 pointer-events-none" : "opacity-100"}`}
-        aria-hidden="true"
-      />
-    );
-  }
 
   const showLoading = bootPhase === "loading";
   const showPowerOn = bootPhase === "ready";
@@ -130,7 +174,7 @@ export function SceneLoader({
 
   return (
     <div
-      className={`fixed inset-0 z-[100] flex flex-col items-center justify-center bg-[#060606] transition-opacity duration-[400ms] ease-out
+      className={`boot-overlay fixed inset-0 z-[100] flex flex-col items-center justify-between bg-[#05050d] px-6 py-6 sm:px-10 sm:py-8 select-none overflow-hidden transition-opacity duration-[380ms] ease-out
         ${overlayFading ? "opacity-0 pointer-events-none" : "opacity-100"}`}
       role="status"
       aria-live="polite"
@@ -138,117 +182,170 @@ export function SceneLoader({
         showPowerOn
           ? "System ready. Press Power On to start."
           : showLoading
-            ? `Loading portfolio scene, ${Math.round(progress)} percent`
+            ? `Loading portfolio scene, ${Math.round(visualProgress)} percent`
             : "Boot sequence in progress"
       }
     >
-      {!isCinematic && (
-        <div className="absolute inset-0 bg-[radial-gradient(circle_at_center,rgba(79,70,229,0.12),transparent_70%)]" />
-      )}
+      {/* Ambient glow and subtle perspective floor */}
+      <div className="boot-ambient-bg absolute inset-0 pointer-events-none" aria-hidden="true" />
+      <div className="boot-grid-floor absolute inset-x-0 bottom-0 h-[35%] pointer-events-none opacity-20" aria-hidden="true" />
 
       {isCinematic && !reducedMotion && (
-        <div className="boot-screen-flash boot-screen-flash-active absolute inset-0 pointer-events-none" aria-hidden="true" />
+        <div
+          className="boot-screen-flash boot-screen-flash-active absolute inset-0 pointer-events-none"
+          aria-hidden="true"
+        />
       )}
 
-      {showLoading && (
-        <>
-          <div className="relative w-32 h-32 perspective-1000 mb-12">
-            <div
-              className={`cube-loader-wrapper w-full h-full preserve-3d ${
-                reducedMotion ? "" : "animate-cube-rotate"
-              }`}
-            >
-              <div className="absolute inset-0 bg-indigo-600/20 border border-indigo-400/40 backdrop-blur-sm translate-z-64" />
-              <div className="absolute inset-0 bg-indigo-600/20 border border-indigo-400/40 backdrop-blur-sm -translate-z-64 rotate-y-180" />
-              <div className="absolute inset-0 bg-indigo-600/20 border border-indigo-400/40 backdrop-blur-sm translate-x-64 rotate-y-90" />
-              <div className="absolute inset-0 bg-indigo-600/20 border border-indigo-400/40 backdrop-blur-sm -translate-x-64 -rotate-y-90" />
-              <div className="absolute inset-0 bg-indigo-600/20 border border-indigo-400/40 backdrop-blur-sm -translate-y-64 rotate-x-90" />
-              <div className="absolute inset-0 bg-indigo-600/20 border border-indigo-400/40 backdrop-blur-sm translate-y-64 -rotate-x-90" />
-            </div>
+      {/* Top minimal bar */}
+      <div
+        className={`relative z-10 flex w-full max-w-5xl items-center justify-between transition-opacity duration-300 ${
+          isCinematic ? "opacity-0" : "opacity-100"
+        }`}
+        aria-hidden="true"
+      >
+        <div className="flex items-center gap-2">
+          <span className="h-1.5 w-1.5 rounded-full bg-purple-400 shadow-[0_0_8px_#a855f7]" />
+          <span className="cube-ui-mono text-[10px] sm:text-xs uppercase tracking-[0.26em] text-slate-400">
+            Portfolio // 2026
+          </span>
+        </div>
+        <div className="cube-ui-mono text-[10px] sm:text-xs uppercase tracking-[0.22em] text-slate-500">
+          {showPowerOn ? "READY" : "LOADING"}
+        </div>
+      </div>
 
-            <div
-              className={`absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-8 h-8 bg-cyan-400 rounded-full blur-xl ${
-                reducedMotion ? "" : "animate-pulse"
-              }`}
-            />
-          </div>
-
-          <div className="relative flex flex-col items-center gap-6 max-w-xs w-full px-8">
-            <div className="flex flex-col items-center gap-1">
-              <span className="text-5xl font-black italic tracking-tighter text-white">
-                {Math.round(progress)}
-                <span className="text-indigo-500 text-3xl">%</span>
-              </span>
-              <span className="cube-ui-mono text-xs uppercase tracking-[0.25em] text-indigo-300/90">
-                {statusText}
-              </span>
-            </div>
-
-            <div className="w-full h-[2px] bg-white/5 rounded-full overflow-hidden border border-white/5">
+      {/* Center stage */}
+      <div className="relative z-10 flex flex-1 flex-col items-center justify-center w-full max-w-xl">
+        {(showLoading || showPowerOn) && (
+          <div className="relative flex flex-col items-center">
+            {/* 3D Rotating GameCube-inspired Holo-Cube */}
+            <div className="relative w-32 h-32 sm:w-36 sm:h-36 flex items-center justify-center mb-7">
+              {/* Outer orbital halo */}
               <div
-                className="h-full bg-gradient-to-r from-indigo-600 to-cyan-400 shadow-[0_0_15px_rgba(79,70,229,0.5)] transition-all duration-300 ease-out"
-                style={{ width: `${progress}%` }}
+                className={`absolute inset-0 rounded-full border border-purple-400/25 shadow-[0_0_40px_rgba(139,92,246,0.25)] ${
+                  showPowerOn ? "scale-110 border-cyan-400/35" : ""
+                } transition-all duration-500`}
+              />
+              <div className="absolute inset-3 rounded-full border border-dashed border-indigo-400/20" />
+
+              <div className="w-24 h-24 perspective-1000">
+                <div
+                  className={`cube-loader-wrapper w-full h-full preserve-3d ${
+                    reducedMotion ? "" : "animate-cube-rotate"
+                  }`}
+                >
+                  <div className="boot-holo-face boot-face-front" />
+                  <div className="boot-holo-face boot-face-back" />
+                  <div className="boot-holo-face boot-face-right" />
+                  <div className="boot-holo-face boot-face-left" />
+                  <div className="boot-holo-face boot-face-top" />
+                  <div className="boot-holo-face boot-face-bottom" />
+                </div>
+              </div>
+
+              {/* Inner glowing core */}
+              <div
+                className={`pointer-events-none absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-10 h-10 rounded-full blur-xl transition-colors duration-500 ${
+                  showPowerOn ? "bg-cyan-400/80" : "bg-purple-500/80"
+                } ${reducedMotion ? "" : "animate-pulse"}`}
               />
             </div>
 
-            <div className="flex flex-col gap-1 w-full mt-2" aria-hidden="true">
-              <div className="flex justify-between cube-ui-mono text-[10px] sm:text-xs text-slate-500 tracking-wider">
-                <span>MEM_ADDR_0x00FF</span>
-                <span>OK</span>
-              </div>
-              <div className="flex justify-between cube-ui-mono text-[10px] sm:text-xs text-slate-500 tracking-wider">
-                <span>GPU_PIPELINE_INIT</span>
-                <span className={progress > 80 ? "text-cyan-400/80" : ""}>
-                  {progress > 80 ? "SUCCESS" : "WAITING"}
+            {showLoading && (
+              <div className="flex flex-col items-center gap-4 w-full max-w-xs px-4 animate-[cube-pop_260ms_ease-out]">
+                <span className="cube-ui-mono text-xs uppercase tracking-[0.25em] text-slate-400">
+                  {statusText.replace(/_/g, " ")}
+                </span>
+
+                <div className="relative h-1 w-48 sm:w-56 rounded-full bg-white/10 overflow-hidden">
+                  <div
+                    className="h-full bg-gradient-to-r from-purple-500 via-indigo-400 to-cyan-300 rounded-full transition-all duration-150 shadow-[0_0_10px_rgba(168,85,247,0.5)]"
+                    style={{ width: `${Math.max(6, visualProgress)}%` }}
+                  />
+                </div>
+
+                <span className="cube-ui-mono text-[10px] tracking-[0.2em] text-slate-500">
+                  {Math.round(visualProgress)}%
                 </span>
               </div>
-            </div>
+            )}
+
+            {showPowerOn && (
+              <div className="flex flex-col items-center gap-5 text-center px-4 animate-[cube-pop_260ms_ease-out]">
+                <div className="space-y-1">
+                  <h2 className="cube-ui text-lg sm:text-xl font-bold tracking-[0.22em] uppercase text-white/95">
+                    Enrique Vázquez
+                  </h2>
+                  <p className="cube-ui-mono text-[10px] sm:text-[11px] tracking-[0.26em] uppercase text-purple-300/60">
+                    Interactive Portfolio
+                  </p>
+                </div>
+
+                <button
+                  type="button"
+                  onClick={handlePowerOn}
+                  autoFocus
+                  className="group relative inline-flex items-center gap-2.5 px-8 py-3 rounded-full border border-purple-400/30 bg-purple-950/30 hover:bg-purple-900/40 hover:border-cyan-400/60 text-white backdrop-blur-md shadow-[0_0_20px_rgba(139,92,246,0.18)] hover:shadow-[0_0_30px_rgba(34,211,238,0.35)] active:scale-95 transition-all duration-300 cursor-pointer"
+                >
+                  <svg
+                    viewBox="0 0 24 24"
+                    className="h-3.5 w-3.5 text-cyan-400 group-hover:text-cyan-300 transition-colors"
+                    fill="none"
+                    stroke="currentColor"
+                    strokeWidth="2.2"
+                  >
+                    <path d="M12 3v9" strokeLinecap="round" />
+                    <path d="M17.66 6.34a8 8 0 1 1-11.32 0" strokeLinecap="round" />
+                  </svg>
+                  <span className="cube-ui-mono text-xs font-semibold uppercase tracking-[0.24em] text-slate-100 group-hover:text-white">
+                    Power On
+                  </span>
+                </button>
+
+                <p className="cube-ui-mono text-[10px] uppercase tracking-[0.2em] text-slate-500">
+                  Press <span className="text-slate-400">Enter</span> to start
+                </p>
+              </div>
+            )}
           </div>
-        </>
-      )}
+        )}
 
-      {showPowerOn && (
-        <div className="relative flex flex-col items-center gap-8 px-8">
-          <p className="cube-ui-mono text-xs uppercase tracking-[0.35em] text-indigo-300/80">
-            SYSTEM_READY
-          </p>
-          <button
-            type="button"
-            onClick={handlePowerOn}
-            className={`boot-power-on cube-ui-mono text-xl sm:text-2xl uppercase tracking-[0.4em] text-cyan-300 border border-cyan-400/40 bg-cyan-500/5 px-10 py-4 rounded-sm
-              hover:bg-cyan-500/15 hover:border-cyan-300/70 hover:text-cyan-100
-              transition-colors ${reducedMotion ? "" : "boot-power-on-blink"}`}
+        {showSystem && (
+          <div
+            className={`flex flex-col items-center gap-2 ${
+              reducedMotion ? "" : "boot-system-flicker"
+            }`}
           >
-            POWER ON
-          </button>
-          <p className="cube-ui-mono text-[10px] uppercase tracking-[0.25em] text-slate-500">
-            Press to initialize
-          </p>
-        </div>
-      )}
+            <span className="cube-ui text-4xl sm:text-6xl font-black italic uppercase tracking-[0.4em] text-white drop-shadow-[0_0_30px_rgba(168,85,247,0.7)]">
+              SYSTEM
+            </span>
+          </div>
+        )}
 
-      {showSystem && (
-        <span
-          className={`cube-ui-mono text-3xl sm:text-5xl uppercase tracking-[0.5em] text-white ${
-            reducedMotion ? "" : "boot-system-flicker"
-          }`}
-        >
-          SYSTEM
-        </span>
-      )}
+        {showBrand && (
+          <div
+            className={`flex flex-col items-center gap-2 text-center ${
+              brandFading ? "boot-brand-fade-out" : "boot-brand-visible"
+            }`}
+          >
+            <h1 className="boot-brand-name text-3xl sm:text-5xl md:text-6xl font-black italic uppercase text-white drop-shadow-[0_0_35px_rgba(139,92,246,0.65)]">
+              Enrique Vázquez
+            </h1>
+          </div>
+        )}
+      </div>
 
-      {showBrand && (
-        <h1
-          className={`boot-brand-name text-2xl sm:text-4xl md:text-5xl uppercase text-white ${
-            brandFading ? "boot-brand-fade-out" : "boot-brand-visible"
-          }`}
-        >
-          Enrique Vazquez
-        </h1>
-      )}
-
-      <div className="absolute top-0 left-0 w-full h-px bg-gradient-to-r from-transparent via-indigo-500/20 to-transparent" />
-      <div className="absolute bottom-0 left-0 w-full h-px bg-gradient-to-r from-transparent via-indigo-500/20 to-transparent" />
+      {/* Bottom minimal footer */}
+      <div
+        className={`relative z-10 flex w-full max-w-5xl items-center justify-between cube-ui-mono text-[10px] uppercase tracking-[0.2em] text-slate-600 transition-opacity duration-300 ${
+          isCinematic ? "opacity-0" : "opacity-100"
+        }`}
+        aria-hidden="true"
+      >
+        <span>Interactive Experience</span>
+        <span>GameCube Edition</span>
+      </div>
     </div>
   );
 }

@@ -3,7 +3,7 @@ import Link from "next/link";
 import React, { useRef, useState, useEffect, useMemo, useCallback } from "react";
 import dynamic from "next/dynamic";
 import { SceneLoader } from "@/components/GameCube/SceneLoader";
-import { type CubeSection } from "@/components/GameCube/CubePreview";
+import { SECTION_ACCENTS, type CubeSection } from "@/components/GameCube/CubePreview";
 import { CubeModal } from "@/components/GameCube/CubeModal";
 import { NavigationGuide } from "@/components/portfolio/NavigationGuide";
 import {
@@ -20,12 +20,16 @@ const DynamicCanvas = dynamic(
   { ssr: false }
 );
 
+let hasSessionBooted = false;
+
 export default function Home() {
   const [view, setView] = useState<ViewState>("HOME");
   const [targetQuaternion, setTargetQuaternion] = useState(new THREE.Quaternion());
   const [touchStart, setTouchStart] = useState<{ x: number; y: number } | null>(null);
   const [isModalOpen, setIsModalOpen] = useState(false);
-  const [bootPhase, setBootPhase] = useState<BootPhase>("loading");
+  const [bootPhase, setBootPhase] = useState<BootPhase>(() =>
+    hasSessionBooted ? "idle" : "loading"
+  );
   const cubeRef = useRef<THREE.Group | null>(null);
   const lastFocusedRef = useRef<HTMLElement | null>(null);
   const bootCompleteFired = useRef(false);
@@ -79,8 +83,7 @@ export default function Home() {
   useEffect(() => {
     if (bootPhase !== "loading") return;
     const safety = setTimeout(() => {
-      const isFast = sessionStorage.getItem("portfolio_boot_seen") === "true";
-      setBootPhase((prev) => (prev === "loading" ? (isFast ? "idle" : "ready") : prev));
+      setBootPhase((prev) => (prev === "loading" ? (hasSessionBooted ? "idle" : "ready") : prev));
     }, 5000);
     return () => clearTimeout(safety);
   }, [bootPhase]);
@@ -105,8 +108,16 @@ export default function Home() {
   const onBootComplete = useCallback(() => {
     if (bootCompleteFired.current) return;
     bootCompleteFired.current = true;
-    sessionStorage.setItem("portfolio_boot_seen", "true");
+    hasSessionBooted = true;
     setBootPhase("idle");
+  }, []);
+
+  const handleReboot = useCallback(() => {
+    setIsModalOpen(false);
+    setView("HOME");
+    hasSessionBooted = false;
+    bootCompleteFired.current = false;
+    setBootPhase("ready");
   }, []);
 
   useEffect(() => {
@@ -178,7 +189,7 @@ export default function Home() {
 
   return (
     <main
-      className="portfolio-shell relative w-full min-h-dvh h-dvh bg-[#060606] overflow-hidden touch-none overscroll-none"
+      className="portfolio-shell relative w-full min-h-dvh h-dvh bg-[#05050d] overflow-hidden touch-none overscroll-none"
       onTouchStart={onTouchStart}
       onTouchMove={() => {}}
       onTouchEnd={onTouchEnd}
@@ -188,14 +199,14 @@ export default function Home() {
         onReady={onReady}
         onPowerOn={onPowerOn}
         onBrandComplete={onBrandComplete}
-        onFastBootComplete={() => setBootPhase("idle")}
+        onFastBootComplete={onBootComplete}
       />
 
       <p className="sr-only" aria-live="polite" aria-atomic="true">
         {liveMessage}
       </p>
 
-      {/* Hero zone */}
+      {/* Hero zone (GameCube System Menu Header) */}
       <div
         className={`portfolio-hero-zone absolute top-0 left-0 right-0 z-10 px-4 sm:px-6 transition-all duration-1000 pointer-events-none select-none
           ${
@@ -204,37 +215,33 @@ export default function Home() {
               : "opacity-0 -translate-y-16 pointer-events-none"
           }`}
       >
-        <div className="mx-auto flex max-w-5xl flex-col items-center gap-1.5 sm:gap-2 md:gap-3 text-center">
-          <div className="flex items-center gap-2 sm:gap-3">
-            <div className="h-px w-6 sm:w-10 bg-purple-500/40" />
-            <p className="cube-ui-mono text-[10px] sm:text-xs uppercase tracking-[0.25em] sm:tracking-[0.35em] text-purple-400 animate-pulse">
-              System Welcome
-            </p>
-            <div className="h-px w-6 sm:w-10 bg-purple-500/40" />
-          </div>
+        <div className="mx-auto flex max-w-5xl flex-col items-center gap-1.5 sm:gap-2 text-center">
+          <p className="portfolio-eyebrow cube-ui-mono text-[10px] sm:text-xs uppercase tracking-[0.28em] text-purple-300/65">
+            System Menu // BIOS Ready
+          </p>
 
-          <div className="space-y-1 sm:space-y-1.5 max-w-4xl">
-            <h1 className="portfolio-hero-title font-black italic tracking-tighter text-white">
+          <div className="max-w-4xl space-y-1">
+            <h1 className="portfolio-hero-title cube-ui font-black italic tracking-tighter text-white">
               HI, I&apos;M A{" "}
-              <span className="text-transparent bg-clip-text bg-gradient-to-r from-purple-400 to-indigo-500">
+              <span className="text-transparent bg-clip-text bg-gradient-to-r from-purple-300 via-violet-400 to-cyan-300">
                 FULL-STACK SOFTWARE DEVELOPER
               </span>
             </h1>
-            <p className="portfolio-hero-subtitle text-slate-400 font-medium tracking-wide max-w-3xl mx-auto">
-              Building AI-Powered Applications | C# / .NET | TypeScript / Next.js | Python
+            <p className="portfolio-hero-subtitle mx-auto flex max-w-3xl flex-wrap items-center justify-center gap-x-2.5 gap-y-1 font-medium tracking-wide text-slate-400">
+              <span>Building AI-Powered Applications</span>
+              <span>C# / .NET</span>
+              <span>TypeScript / Next.js</span>
+              <span>Python</span>
             </p>
           </div>
 
-          <div className="portfolio-user-badge mt-1 sm:mt-2">
-            <div className="px-3 sm:px-4 py-1.5 border border-cyan-400/20 bg-cyan-500/5 rounded-full">
-              <span className="cube-ui-mono text-[11px] sm:text-xs text-slate-400 uppercase tracking-[0.15em] sm:tracking-widest">
-                User:{" "}
-                <span className="text-cyan-300/90 font-bold ml-1 tracking-[0.2em]">
-                  ENRIQUE_VAZQUEZ
-                </span>
-              </span>
-            </div>
-          </div>
+          <p className="cube-ui-mono text-[10px] uppercase tracking-[0.16em] text-slate-500 sm:text-xs">
+            <span className="mr-1.5 inline-block h-1.5 w-1.5 translate-y-[-1px] rounded-full bg-emerald-400/80" />
+            Player 01
+            <span className="ml-1.5 font-semibold tracking-[0.18em] text-slate-300">
+              ENRIQUE_VAZQUEZ
+            </span>
+          </p>
         </div>
       </div>
 
@@ -244,49 +251,92 @@ export default function Home() {
         cubeRef={cubeRef}
         activeSection={activeSection}
         onOpen={openModal}
+        onSelectSection={(s) => {
+          if (!isBootIdle || isModalOpen) return;
+          setView(s);
+        }}
         view={view}
         isModalOpen={isModalOpen}
         bootPhase={bootPhase}
         onBootComplete={onBootComplete}
       />
 
-      <CubeModal isOpen={isModalOpen} section={activeSection} onClose={closeModal} />
+      <CubeModal
+        isOpen={isModalOpen}
+        section={activeSection}
+        onClose={closeModal}
+      />
 
-      {/* HUD zone */}
+      {/* HUD zone (GameCube Console Bottom Bar) */}
       <div
         className={`portfolio-hud-zone absolute bottom-0 left-0 right-0 z-10 pointer-events-none px-3 sm:px-6 lg:px-10 transition-opacity duration-1000
           ${showBootChrome ? "opacity-100" : "opacity-0"}`}
       >
-        <div className="mx-auto grid w-full max-w-7xl grid-cols-1 items-end gap-3 lg:grid-cols-[1fr_auto_1fr] lg:gap-4">
-          <div className="hidden lg:block portfolio-hud-meta uppercase tracking-widest" aria-hidden="true">
-            SYSTEM VERSION 2026.04
+        <div className="mx-auto grid w-full max-w-7xl grid-cols-1 items-end gap-2.5 lg:grid-cols-[1fr_auto_1fr] lg:gap-4">
+          {/* Left: System telemetry + Reboot button */}
+          <div className="hidden lg:flex items-center gap-3 pointer-events-auto">
+            <button
+              type="button"
+              onClick={handleReboot}
+              disabled={!isBootIdle}
+              title="Reboot GameCube System Intro"
+              className="group inline-flex items-center gap-2 px-3 py-1.5 rounded-md border border-purple-500/30 bg-purple-950/30 hover:bg-purple-500/20 hover:border-cyan-400/50 backdrop-blur-sm transition-all cursor-pointer"
+            >
+              <span className="h-2 w-2 rounded-full bg-purple-400 group-hover:bg-cyan-300 shadow-[0_0_8px_#a855f7] transition-colors" />
+              <span className="cube-ui-mono text-[10px] uppercase tracking-[0.2em] text-purple-200 group-hover:text-white">
+                ⏻ Reboot
+              </span>
+            </button>
+            <span className="portfolio-hud-meta cube-ui-mono uppercase tracking-widest" aria-hidden="true">
+              BIOS VER 2026.04
+            </span>
           </div>
 
-          <div className="flex flex-col items-center gap-2 pointer-events-auto lg:col-start-2">
-            <div className="px-3 py-1.5 border-t border-purple-500/30">
-              <span className="portfolio-hud-functional cube-ui-mono text-[11px] sm:text-xs tracking-[0.16em] uppercase text-center">
-                {view === "HOME" ? "Select Section" : `View: ${view}`}
+          {/* Center: GameCube BIOS Status & Section Controls */}
+          <div className="flex flex-col items-center gap-1.5 pointer-events-auto lg:col-start-2">
+            <div className="inline-flex items-center gap-2.5 px-4 py-1.5 rounded-full border border-purple-500/35 bg-purple-950/40 backdrop-blur-md shadow-[0_0_20px_rgba(139,92,246,0.2)]">
+              <span className="portfolio-hud-functional cube-ui-mono text-[11px] sm:text-xs tracking-[0.18em] uppercase text-center">
+                {view === "HOME" ? (
+                  "Select Section"
+                ) : (
+                  <>
+                    Slot:{" "}
+                    <span style={{ color: SECTION_ACCENTS[view].hex }} className="font-bold">
+                      {SECTION_LABELS[view]}
+                    </span>
+                  </>
+                )}
               </span>
-              <span className="text-purple-300/50 text-xs ml-2" aria-hidden="true">
-                {view === "HOME" ? "↕" : "↵"}
+              <span className="text-purple-300/70 text-xs cube-ui-mono" aria-hidden="true">
+                {view === "HOME" ? "▲ ▼ ◀ ▶" : "↵ ENTER"}
               </span>
+              {view !== "HOME" && (
+                <button
+                  type="button"
+                  onClick={() => setView("HOME")}
+                  className="ml-1 px-2 py-0.5 rounded border border-white/15 bg-white/5 hover:bg-white/15 cube-ui-mono text-[10px] uppercase tracking-wider text-slate-200 transition-colors cursor-pointer"
+                >
+                  B / Back
+                </button>
+              )}
             </div>
           </div>
 
-          <div className="flex justify-center lg:justify-end items-end gap-4 lg:pr-[calc(3rem+4.5rem)] pointer-events-auto mt-2 lg:mt-0">
+          {/* Right: Memory Card (Notes) */}
+          <div className="flex justify-center lg:justify-end items-end gap-4 lg:pr-[calc(3rem+4.5rem)] pointer-events-auto mt-1 lg:mt-0">
             <div className="portfolio-hud-meta text-center lg:text-right">
               <Link
                 href="/notes"
-                className="group inline-flex items-center gap-2 px-3 py-1.5 sm:px-4 sm:py-2 bg-purple-500/10 hover:bg-purple-500/30 border border-purple-500/30 hover:border-cyan-400/60 rounded-md backdrop-blur-sm transition-all shadow-[0_0_15px_rgba(168,85,247,0.2)] hover:shadow-[0_0_25px_rgba(34,211,238,0.3)]"
+                className="group inline-flex items-center gap-2.5 px-3.5 py-1.5 sm:px-4 sm:py-2 bg-purple-500/12 hover:bg-purple-500/28 border border-purple-400/35 hover:border-cyan-400/65 rounded-lg backdrop-blur-md transition-all shadow-[0_0_18px_rgba(168,85,247,0.22)] hover:shadow-[0_0_28px_rgba(34,211,238,0.35)]"
                 tabIndex={isBootIdle ? 0 : -1}
               >
-                <div className="w-1.5 h-1.5 rounded-full bg-cyan-400 animate-pulse" />
-                <span className="cube-ui-mono text-[10px] sm:text-xs text-white group-hover:text-cyan-100 uppercase tracking-widest">
+                <div className="w-2 h-2 rounded-full bg-cyan-400 shadow-[0_0_8px_#22d3ee] animate-pulse" />
+                <span className="cube-ui-mono text-[10px] sm:text-xs text-white group-hover:text-cyan-100 uppercase tracking-[0.18em]">
                   Memory Card (Notes)
                 </span>
               </Link>
-              <div className="hidden lg:block text-[9px] text-slate-500 uppercase tracking-widest mt-2">
-                DISC: PORTFOLIO_V1
+              <div className="hidden lg:block cube-ui-mono text-[9px] text-purple-300/50 uppercase tracking-[0.22em] mt-1.5">
+                SLOT A // DISC: PORTFOLIO_V2
               </div>
             </div>
           </div>
@@ -303,24 +353,24 @@ export default function Home() {
         <NavigationGuide currentView={view} onNavigate={handleInput} />
       </div>
 
-      {/* Decorative corners */}
+      {/* Decorative GameCube BIOS corners */}
       <div
-        className={`hidden md:block absolute top-0 left-0 w-20 h-20 border-t border-l border-purple-500/20 m-6 pointer-events-none transition-opacity duration-1000 ${
+        className={`hidden md:block absolute top-0 left-0 w-16 h-16 border-t-2 border-l-2 border-purple-500/25 rounded-tl-md m-5 pointer-events-none transition-opacity duration-1000 ${
           showBootChrome ? "opacity-100" : "opacity-0"
         }`}
       />
       <div
-        className={`hidden md:block absolute top-0 right-0 w-20 h-20 border-t border-r border-purple-500/20 m-6 pointer-events-none transition-opacity duration-1000 ${
+        className={`hidden md:block absolute top-0 right-0 w-16 h-16 border-t-2 border-r-2 border-purple-500/25 rounded-tr-md m-5 pointer-events-none transition-opacity duration-1000 ${
           showBootChrome ? "opacity-100" : "opacity-0"
         }`}
       />
       <div
-        className={`hidden md:block absolute bottom-0 left-0 w-20 h-20 border-b border-l border-purple-500/20 m-6 pointer-events-none transition-opacity duration-1000 ${
+        className={`hidden md:block absolute bottom-0 left-0 w-16 h-16 border-b-2 border-l-2 border-purple-500/25 rounded-bl-md m-5 pointer-events-none transition-opacity duration-1000 ${
           showBootChrome ? "opacity-100" : "opacity-0"
         }`}
       />
       <div
-        className={`hidden md:block absolute bottom-0 right-0 w-20 h-20 border-b border-r border-purple-500/20 m-6 pointer-events-none transition-opacity duration-1000 ${
+        className={`hidden md:block absolute bottom-0 right-0 w-16 h-16 border-b-2 border-r-2 border-purple-500/25 rounded-br-md m-5 pointer-events-none transition-opacity duration-1000 ${
           showBootChrome ? "opacity-100" : "opacity-0"
         }`}
       />
